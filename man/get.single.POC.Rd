@@ -4,7 +4,7 @@
 \alias{get.single.POC}
 \title{get.single.POC}
 \usage{
-get.single.POC(W, W.labels, o.k, CLIQUES)
+get.single.POC(CLIQUES)
 }
 \arguments{
 \item{A}{Description of the parameter}

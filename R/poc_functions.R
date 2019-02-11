@@ -132,8 +132,6 @@ CHECK1=function(CLIB)
 		return(list(bbb=bbb))
 }
 
-
-
 #' rCLI
 #'
 #' We draw a random permutation of cliques from CLI and accept it only if it is perfect
@@ -157,7 +155,7 @@ rCLI=function(CLI) {
 
 #' Wmat
 #'
-#' FUNCTIONS Wmat AND matmod FORM THE TECHNICAL CORE OF THE ALGORITHM WHICH CONSTRUCTS A PERFECT PERMUTATION OF CLIQUES (ASSUMING THAT IT IS POSSIBLE). function Wmat constructs the weighted coincidence matrix for the set	of cliques CLI with weight w(i,j) = number of vertices in C_i\cap C_j
+#' FUNCTIONS Wmat AND matmod FORM THE TECHNICAL CORE OF THE ALGORITHM WHICH CONSTRUCTS A PERFECT PERMUTATION OF CLIQUES (ASSUMING THAT IT IS POSSIBLE). function Wmat constructs the weighted coincidence matrix for the set	of cliques CLI with weight w(i,j) = number of vertices in C_i cap C_j
 #' @param A Description of the parameter
 #' @keywords A
 #' @export
@@ -292,15 +290,43 @@ RECURRENT.POC.SEARCH.WRAPPER <- function(CLIQUES, filename='POC_list.csv')
 	return(list(POCs, SymmGroup.on.C))
 }
 
-#' get.single.POC
+#' get.all.POCs
 #'
-#' get.single.POC descroption
+#' get.all.POCs descroption
 #' @param A Description of the parameter
 #' @keywords A
 #' @export 
 #' @examples
-#' get.single.POC(...)
-get.single.POC <- function(W, W.labels, o.k, CLIQUES)
+#' get.all.POCs(...)
+get.all.POCs <- function(CLIQUES, method)
+{
+    all.POCs=list()
+    if (method=='recurrent')
+    {
+        all.POCs=RECURRENT.POC.SEARCH.WRAPPER(CLIQUES)
+    }
+    if (method=='check.all')
+    {
+        all.permutations=permn(1:length(CLIQUES))
+        all.POCs=lapply(all.permutations,
+                        function(permutation)
+                        {
+                            if (CHECK1(CLIQUES[permutation])$bbb) return(permutation);
+                        }
+                        )
+    }
+}
+
+
+#' single.POC
+#'
+#' single.POC descroption
+#' @param A Description of the parameter
+#' @keywords A
+#' @export 
+#' @examples
+#' single.POC(...)
+single.POC <- function(W, W.labels, o.k, CLIQUES)
 {
 		n=dim(W)[1]
 		B=W
@@ -312,31 +338,32 @@ get.single.POC <- function(W, W.labels, o.k, CLIQUES)
 		}
 		B.ColSum=colSums(B) # sums of columns in B
 		B.labels=W.labels[o.k.c] # labels of cliques which have not been chosen yet
-		for (j in B.labels[B.ColSum>0])
-		{
-				o.k.j=c(o.k,j) # vector of labels of already chosen cliques
-				if (length(o.k.j)==n)
-				{
-						POC<<-o.k.j
-				}
-				get.single.POC(W,W.labels, o.k=o.k.j, CLIQUES); # recursion step
-		}
+    if (length(B.labels[B.ColSum>0])==1) j=B.labels[B.ColSum>0];
+    if (length(B.labels[B.ColSum>0])>1)  j = sample(B.labels[B.ColSum>0],1);
+    ##j = B.labels[B.ColSum>0][1]
+    o.k.j=c(o.k,j) # vector of labels of already chosen cliques
+    if (length(o.k.j)==n)
+    {
+        #print(o.k.j)
+        POC<<-o.k.j
+    }
+    if (length(o.k.j)<n) single.POC(W,W.labels, o.k=o.k.j, CLIQUES); # recursion step
 }
 
-#' get.single.POC.wrapper
+#' get.single.POC
 #'
 #' get.single.POC descroption
 #' @param A Description of the parameter
 #' @keywords A
 #' @export 
 #' @examples
-#' get.single.POC.wrapper(...)
-get.single.POC.wrapper <- function(CLIQUES)
+#' get.single.POC(...)
+get.single.POC <- function(CLIQUES)
 {
 		W=Wmat(CLIQUES)$A
 		W.labels=col(W)[1,]
 		o.k=c()
-		get.single.POC(W, W.labels, o.k, CLIQUES)
+		single.POC(W, W.labels, o.k, CLIQUES)
 		return(POC)
 }
 
@@ -352,5 +379,114 @@ is.decomposable <- function(CLIQUES)
 {
 		POC.candidate=get.single.POC.wrapper(CLIQUES)
 		return(CHECK1(CLIQUES[POC.candidate])$bbb==1)
+}
+
+#' rPOC
+#'
+#' rPOC description
+#' @param n Description of the parameter
+#' @keywords random sample
+#' @export 
+#' @examples
+#' rPOC.unif(1,CLIQUES)
+rPOC <- function(n,CLIQUES,method='algorithm-sample', replace=TRUE)
+{
+    nPOCs=list()
+    if (method=='algorithm-sample')
+    {
+        if (replace)
+        {
+            nPOCs=lapply(1:n,function(i) get.single.POC(CLIQUES));
+        }
+        if (!(replace))
+        {
+            if (n>factorial(length(CLIQUES)))
+            {
+                print('Warning: sampling space smaller than sample size')
+                return(nPOCs)
+            }
+            counter=1
+            while (counter<=n)
+            {
+                POC.candidate=get.single.POC(CLIQUES)
+                if (!(list(POC.candidate) %in% nPOCs))
+                {
+                    nPOCs[[counter]]=POC.candidate
+                    counter=counter+1
+                }
+            }
+
+        }
+
+    }
+    if (method=='uniform-rejection')
+    {
+        if (replace)
+        {
+            counter=1
+            while (counter<=n)
+            {
+                POC.candidate=sample(1:length(CLIQUES))
+                if (CHECK1(CLIQUES[POC.candidate])$bbb)
+                {
+                    nPOCs[[counter]]=POC.candidate
+                    counter=counter+1
+                }
+            }
+        }
+        if (!(replace))
+        {
+            if (n>factorial(length(CLIQUES)))
+            {
+                print('Warning: sampling space smaller than sample size')
+                return(nPOCs)
+            }
+            all.permutations=permn(1:length(CLIQUES))
+            counter=1
+            while (counter<=n)
+            {
+                POC.candidate=unlist(sample(all.permutations,1))
+                if (!(list(POC.candidate) %in% nPOCs) && CHECK1(CLIQUES[POC.candidate])$bbb)
+                {
+                    nPOCs[[counter]]=POC.candidate
+                    counter=counter+1
+                }
+            }
+
+        }
+
+    }
+    if (method=='uniform-sample')
+    {
+        all.POCs.matrix=RECURRENT.POC.SEARCH.WRAPPER(CLIQUES)[[1]]
+        all.POCs = lapply(1:dim(all.POCs.matrix)[1], function(row.id) all.POCs.matrix[row.id,,drop=F])
+        if (replace)
+        {
+            nPOCs=sample(all.POCs,n, replace=TRUE)
+        }
+
+        if (!(replace))
+        {
+            if (n>factorial(length(CLIQUES)))
+            {
+                print('Warning: sampling space smaller than sample size')
+                return(nPOCs)
+            }
+            counter=1
+            while (counter<=n)
+            {
+                POC.candidate=unlist(sample(all.POCs,1))
+                if (!(list(POC.candidate) %in% nPOCs) & CHECK1(CLIQUES[POC.candidate])$bbb)
+                {
+                    nPOCs[[counter]]=POC.candidate
+                    counter=counter+1
+                }
+            }
+
+
+        }
+    }
+
+    return(nPOCs)
 }
 
