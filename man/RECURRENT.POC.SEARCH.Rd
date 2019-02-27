@@ -4,7 +4,7 @@
 \alias{RECURRENT.POC.SEARCH}
 \title{RECURRENT.POC.SEARCH}
 \usage{
-RECURRENT.POC.SEARCH(W, W.labels, o.k, CLIQUES, filename)
+RECURRENT.POC.SEARCH(W, W.labels, o.k, CLIQUES)
 }
 \arguments{
 \item{A}{Description of the parameter}

@@ -4,7 +4,7 @@
 \alias{RECURRENT.POC.SEARCH.WRAPPER}
 \title{RECURRENT.POC.SEARCH.WRAPPER}
 \usage{
-RECURRENT.POC.SEARCH.WRAPPER(CLIQUES, filename = "POC_list.csv")
+RECURRENT.POC.SEARCH.WRAPPER(CLIQUES)
 }
 \arguments{
 \item{A}{Description of the parameter}

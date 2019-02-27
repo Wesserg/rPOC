@@ -231,7 +231,7 @@ matmod=function(A,R,CLI=CLI) {
 #' @export 
 #' @examples
 #' RECURRENT.POC.SEARCH(...)
-RECURRENT.POC.SEARCH <- function(W, W.labels, o.k, CLIQUES, filename)
+RECURRENT.POC.SEARCH <- function(W, W.labels, o.k, CLIQUES)
 {
 	n=dim(W)[1]
 	B=W
@@ -245,8 +245,7 @@ RECURRENT.POC.SEARCH <- function(W, W.labels, o.k, CLIQUES, filename)
 	B.labels=W.labels[o.k.c] # labels of cliques which have not been chosen yet
 	if (n==2)
 	{
-			write(c(1,2), file=filename, append=TRUE, sep=",", ncolumns=n) 
-			write(c(2,1), file=filename, append=TRUE, sep=",", ncolumns=n)
+      assign("all.POCs", list(c(2,1), c(1,2)),envir = .GlobalEnv)
 			return(NULL)
 	}
 	for (j in B.labels[B.ColSum>0])
@@ -254,13 +253,13 @@ RECURRENT.POC.SEARCH <- function(W, W.labels, o.k, CLIQUES, filename)
 			o.k.j=c(o.k,j) # vector of labels of already chosen cliques
 			if (length(o.k.j)==n)
 			{
-					write(o.k.j, file=filename, append=TRUE, sep=",", ncolumns=length(o.k.j)) 
-					write(o.k.j[c(2,1,3:length(o.k.j))], file=filename, append=TRUE, sep=",", ncolumns=length(o.k.j)) 
+          assign("all.POCs", c(all.POCs, o.k.j),envir = .GlobalEnv)
+          assign("all.POCs", c(all.POCs, o.k.j[c(2,1,3:length(o.k.j))]),envir = .GlobalEnv)
 			}
-			
-			if (length(o.k.j)<2) RECURRENT.POC.SEARCH(W,W.labels, o.k=o.k.j, CLIQUES, filename); # recursion step if o.k.j has single clique
-			if (length(o.k.j)>=2 & o.k.j[1] < o.k.j[2]) RECURRENT.POC.SEARCH(W,W.labels, o.k=o.k.j, CLIQUES, filename); # recursion step
-		
+
+			if (length(o.k.j)<2) RECURRENT.POC.SEARCH(W,W.labels, o.k=o.k.j, CLIQUES); # recursion step if o.k.j has single clique
+			if (length(o.k.j)>=2 & o.k.j[1] < o.k.j[2]) RECURRENT.POC.SEARCH(W,W.labels, o.k=o.k.j, CLIQUES); # recursion step
+
 	}
 	return(NULL)
 }
@@ -273,21 +272,15 @@ RECURRENT.POC.SEARCH <- function(W, W.labels, o.k, CLIQUES, filename)
 #' @export 
 #' @examples
 #' RECURRENT.POC.SEARCH.WRAPPER(...)
-RECURRENT.POC.SEARCH.WRAPPER <- function(CLIQUES, filename='POC_list.csv')
+RECURRENT.POC.SEARCH.WRAPPER <- function(CLIQUES)
 {
-	W=Wmat(CLIQUES)$A
-	W.labels=col(W)[1,]
-	o.k=c()
-	if (file.exists(filename)) file.remove(filename)
-	out=RECURRENT.POC.SEARCH(W, W.labels, o.k, CLIQUES, filename)
-	POCs=matrix()
-	SymmGroup.on.C=c()
-	if (file.exists(filename))
-	{
-			POCs=read.table(file=filename, sep=',')
-			SymmGroup.on.C=lapply(1:dim(POCs)[1], function(POCi) lapply(POCs[POCi,], function(i) CLIQUES[[i]]))
-	}
-	return(list(POCs, SymmGroup.on.C))
+    assign("all.POCs", c(), envir = .GlobalEnv)
+    W=Wmat(CLIQUES)$A
+    W.labels=col(W)[1,]
+    o.k=c()
+    out=RECURRENT.POC.SEARCH(W, W.labels, o.k, CLIQUES)
+    POCs=matrix(all.POCs, ncol=length(CLIQUES), byrow=TRUE)
+    return(POCs)
 }
 
 #' get.all.POCs
@@ -300,21 +293,21 @@ RECURRENT.POC.SEARCH.WRAPPER <- function(CLIQUES, filename='POC_list.csv')
 #' get.all.POCs(...)
 get.all.POCs <- function(CLIQUES, method)
 {
-    all.POCs=list()
     if (method=='recurrent')
     {
-        all.POCs=RECURRENT.POC.SEARCH.WRAPPER(CLIQUES)
+        POCs=RECURRENT.POC.SEARCH.WRAPPER(CLIQUES)
     }
     if (method=='check.all')
     {
+        POCs=list()
         all.permutations=permn(1:length(CLIQUES))
-        all.POCs=lapply(all.permutations,
-                        function(permutation)
-                        {
-                            if (CHECK1(CLIQUES[permutation])$bbb) return(permutation);
-                        }
-                        )
+        for (i in 1:length(all.permutations))
+        {
+            if (CHECK1(CLIQUES[all.permutations[[i]]])$bbb) POCs=c(POCs,all.permutations[[i]]);
+        }
+        POCs=matrix(unlist(POCs),ncol=length(CLIQUES), byrow=TRUE)
     }
+    return(POCs)
 }
 
 
@@ -402,7 +395,6 @@ rPOC <- function(n,CLIQUES,method='algorithm-sample', replace=TRUE)
         {
             if (n>factorial(length(CLIQUES)))
             {
-                print('Warning: sampling space smaller than sample size')
                 return(nPOCs)
             }
             counter=1
@@ -458,11 +450,11 @@ rPOC <- function(n,CLIQUES,method='algorithm-sample', replace=TRUE)
     }
     if (method=='uniform-sample')
     {
-        all.POCs.matrix=RECURRENT.POC.SEARCH.WRAPPER(CLIQUES)[[1]]
-        all.POCs = lapply(1:dim(all.POCs.matrix)[1], function(row.id) all.POCs.matrix[row.id,,drop=F])
+        POCs.matrix=RECURRENT.POC.SEARCH.WRAPPER(CLIQUES)[[1]]
+        POCs = lapply(1:dim(POCs.matrix)[1], function(row.id) POCs.matrix[row.id,,drop=F])
         if (replace)
         {
-            nPOCs=sample(all.POCs,n, replace=TRUE)
+            nPOCs=sample(POCs,n, replace=TRUE)
         }
 
         if (!(replace))
@@ -475,7 +467,7 @@ rPOC <- function(n,CLIQUES,method='algorithm-sample', replace=TRUE)
             counter=1
             while (counter<=n)
             {
-                POC.candidate=unlist(sample(all.POCs,1))
+                POC.candidate=unlist(sample(POCs,1))
                 if (!(list(POC.candidate) %in% nPOCs) & CHECK1(CLIQUES[POC.candidate])$bbb)
                 {
                     nPOCs[[counter]]=POC.candidate
