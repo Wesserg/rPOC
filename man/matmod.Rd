@@ -4,15 +4,15 @@
 \alias{matmod}
 \title{matmod}
 \usage{
-matmod(A, R, CLI = CLI)
+matmod(W, A, CLI)
 }
 \arguments{
 \item{A}{Description of the parameter}
 }
 \description{
-FUNCTIONS Wmat AND matmod FORM THE TECHNICAL CORE OF THE ALGORITHM WHICH CONSTRUCTS A PERFECT PERMUTATION OF CLIQUES (ASSUMING THAT IT IS POSSIBLE). function matmod puts zeros in the weighted	incidence matrix A	for those edges connecting vertices from R to vertices from R^c which are removable with respect to R
+FUNCTIONS Wmat AND matmod FORM THE TECHNICAL CORE OF THE ALGORITHM WHICH CONSTRUCTS A PERFECT PERMUTATION OF CLIQUES (ASSUMING THAT IT IS POSSIBLE). function matmod puts zeros in the weighted	incidence matrix W	for those edges connecting vertices from A to vertices from A^c which are removable with respect to R
 }
 \examples{
-matmod(A,R,CLI)
+matmod(W,R,CLI)
 }
-\keyword{A}
+\keyword{W}

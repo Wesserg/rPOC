@@ -4,7 +4,7 @@
 \alias{Get.weighted.clique.graph}
 \title{Add an alpha value to a colour}
 \usage{
-Get.weighted.clique.graph(CLIQUES, draw = FALSE)
+Get.weighted.clique.graph(CLIQUES, draw = FALSE, prefix = "")
 }
 \arguments{
 \item{A}{Description of the parameter}
