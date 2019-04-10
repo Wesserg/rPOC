@@ -175,65 +175,7 @@ Wmat=function(CLI)
     W=W+t(W)
     return(W)
 }
-
-#' matmod
-#'
-#' FUNCTIONS Wmat AND matmod FORM THE TECHNICAL CORE OF THE ALGORITHM WHICH CONSTRUCTS A PERFECT PERMUTATION OF CLIQUES (ASSUMING THAT IT IS POSSIBLE). function matmod puts zeros in the weighted	incidence matrix W	for those edges connecting vertices from A to vertices from A^c which are removable with respect to R
-#' @param A Description of the parameter
-#' @keywords W
-#' @export 
-#' @examples
-#' matmod(W,R,CLI)
-matmod=function(W,A,CLI)
-{
-    AC=setdiff(1:length(CLI),A)
-    WCG=graph_from_adjacency_matrix(W, mode =  "undirected", weighted = TRUE)
-#    print(AC)
-    for (r in A)
-    {
-        for (s in AC)
-        {
-            if (W[r,s]>0) #edge must exist inthe first place to be removed.
-            {
-                paths.r2s=all_simple_paths(WCG, from=r, to = s, mode = "all")
-                for (path.r2s in paths.r2s)
-                {
-                    if ((length(path.r2s) != 2) & is.removable(path.r2s,A,W))
-                    {
-                        W[r,s]=0
-                        print(c(r,s))
-                        break #If it is removable at least once, remove it. Stop searching
-                    }
-                }
-
-            }
-        }
-    }
-    return(W)
-}
-#' is.removalble
-#'
-#' Check if removable 
-#' @param A Description of the parameter
-#' @keywords W
-#' @export 
-#' @examples
-#' is.removable(r,s,A,W )
-is.removable<-function(path.r2s,A,W)
-{
-    r=path.r2s[1]
-    s=path.r2s[length(path.r2s)]
-    Wmin=W[r,s]
-    path.matrix=cbind(path.r2s[-length(path.r2s)],path.r2s[-1])
-    path.not.in.A=apply(path.matrix, 1, function(path.step) length(setdiff(path.step, A ))>0)
-    if (sum(path.not.in.A)==length(path.not.in.A)) return(FALSE);
-    all.weights.greater=apply(path.matrix, 1, function(path.step) W[path.step[1], path.step[2]] > Wmin)
-    if (sum(all.weights.greater)==length(all.weights.greater)) return(TRUE);
-    return(FALSE)
-
-}
-
-#' matmod2
+#' matmod_new
 #'
 #' FUNCTIONS Wmat AND matmod FORM THE TECHNICAL CORE OF THE ALGORITHM WHICH CONSTRUCTS A PERFECT PERMUTATION OF CLIQUES (ASSUMING THAT IT IS POSSIBLE). function matmod puts zeros in the weighted	incidence matrix A	for those edges connecting vertices from R to vertices from R^c which are removable with respect to R
 #' @param A Description of the parameter
@@ -241,16 +183,52 @@ is.removable<-function(path.r2s,A,W)
 #' @export 
 #' @examples
 #' matmod(W,R,CLI)
-matmod2=function(W,A,CLI=CLI) {
+matmod=function(W,A,CLI=CLI)
+{
+    n=length(CLI)
+#    AC=setdiff(1:n, A)
+    W.not_in.A=array(TRUE, c(n,n)) #initialize as if all edges are not in A
+    if (length(A)>1) #Find edges in A and mark with "FALSE"
+    {
+        all.A.pairs=t(combn(A,2))
+        W.not_in.A[all.A.pairs]=FALSE 
+        W.not_in.A=W.not_in.A & t(W.not_in.A) #Make it symmetric
+    }
+    sorted.unique.weights=sort(unique(as.vector(W)))[-1] #Only iterate over actually present weights
+    for (k in sorted.unique.weights)
+    {
+        W.less_k=(W < k)
+        W2=W.less_k & W.not_in.A #Removing candidates on level 'k'
+        W1=(W2==FALSE) #Not removable
+        W1_m=W1
+        m=1
+        while (m  < (n-1))
+        {
+            m=m+1
+            W1_m=W1_m%*%W1
+            W[W2*W1_m>0]=0 #remove edge if there exists a path of length m that goes through non-removable edges on level k
+        }
+    }
+    return(W)
+}
+
+#' matmod_old
+#'
+#' FUNCTIONS Wmat AND matmod FORM THE TECHNICAL CORE OF THE ALGORITHM WHICH CONSTRUCTS A PERFECT PERMUTATION OF CLIQUES (ASSUMING THAT IT IS POSSIBLE). function matmod puts zeros in the weighted	incidence matrix A	for those edges connecting vertices from R to vertices from R^c which are removable with respect to R
+#' @param A Description of the parameter
+#' @keywords W
+#' @export 
+#' @examples
+#' matmod(W,R,CLI)
+matmod_old=function(W,A,CLI=CLI) {
 	K1=max(W)
 	K2=min(W[W>0])
 	
 	W3=W
-	for (k in (K2+1):K1)
+	for (k in (K2+1):K1) 
 	{
 		W1=W3
 		W2=W3
-		
 		for (i in 1:length(CLI)) 
 		{
 			for (j in 1:length(CLI)) {
@@ -273,11 +251,11 @@ matmod2=function(W,A,CLI=CLI) {
 						}
 				}
 		}
-		
+
 		W3=W3*B
+
 	}
-	
-	return(W3) 
+    return(W3) 
 }
 
 
@@ -305,7 +283,6 @@ RECURRENT.POC.SEARCH <- function(W, W.labels, o.k, CLIQUES)
 	{
       ## Using the fact that permutation of initial two elements of POC yields also a POC
       assign("all.POCs", list(c(2,1), c(1,2)),envir = .GlobalEnv)
-			return(NULL)
 	}
 	for (j in B.labels[B.ColSum>0])
 	{
@@ -321,7 +298,6 @@ RECURRENT.POC.SEARCH <- function(W, W.labels, o.k, CLIQUES)
 			if (length(o.k.j)>=2 & o.k.j[1] < o.k.j[2]) RECURRENT.POC.SEARCH(W,W.labels, o.k=o.k.j, CLIQUES); # recursion step. ensuring we will not double the outcomes with investigating only one order of initial two elements of a POC
 
 	}
-	return(NULL)
 }
 
 #' RECURRENT.POC.SEARCH.WRAPPER

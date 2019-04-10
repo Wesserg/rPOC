@@ -2,15 +2,15 @@
 % Please edit documentation in R/poc_functions.R
 \name{matmod}
 \alias{matmod}
-\title{matmod}
+\title{matmod_new}
 \usage{
-matmod(W, A, CLI)
+matmod(W, A, CLI = CLI)
 }
 \arguments{
 \item{A}{Description of the parameter}
 }
 \description{
-FUNCTIONS Wmat AND matmod FORM THE TECHNICAL CORE OF THE ALGORITHM WHICH CONSTRUCTS A PERFECT PERMUTATION OF CLIQUES (ASSUMING THAT IT IS POSSIBLE). function matmod puts zeros in the weighted	incidence matrix W	for those edges connecting vertices from A to vertices from A^c which are removable with respect to R
+FUNCTIONS Wmat AND matmod FORM THE TECHNICAL CORE OF THE ALGORITHM WHICH CONSTRUCTS A PERFECT PERMUTATION OF CLIQUES (ASSUMING THAT IT IS POSSIBLE). function matmod puts zeros in the weighted	incidence matrix A	for those edges connecting vertices from R to vertices from R^c which are removable with respect to R
 }
 \examples{
 matmod(W,R,CLI)
