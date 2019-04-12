@@ -96,7 +96,6 @@ poc1=function(n) {
 	return(list(CLI=CLI,SEP=SEP))
 }
 
-
 #' CHECK1
 #'
 #' function CHECK checks if CLIB is a perfect ordering of cliques
@@ -105,21 +104,48 @@ poc1=function(n) {
 #' @export 
 #' @examples
 #' CHECK1(CLIQUES)
-CHECK1=function(CLIB)
+CHECK1=function(CLIQUES)
 {
-		UCLI=list(CLIB[[1]])
-		kk=length(CLIB)
-		for (k in 2:kk) UCLI=c(UCLI,list(union(UCLI[[k-1]],CLIB[[k]])))
+		n=length(CLIQUES)
+    UCLI=lapply(1:n, function(k) unique(unlist(CLIQUES[1:k])))
+    UCLIS=lapply(2:n, function(k) intersect(CLIQUES[[k]], UCLI[[k-1]]))
+
+		for (j in 1:(n-1))
+    {
+				for (i in 1:j)
+        {
+            ij_condition=prod(UCLIS[[j]] %in% CLIQUES[[i]])==1
+            if (ij_condition) break;
+				}
+        if (!(ij_condition)) return(FALSE);
+		}
+		return(TRUE)
+}
+
+
+#' CHECK1_OLD
+#'
+#' function CHECK checks if CLIB is a perfect ordering of cliques
+#' @param A Description of the parameter
+#' @keywords A
+#' @export 
+#' @examples
+#' CHECK1_OLD(CLIQUES)
+CHECK1_OLD=function(CLI)
+{
+		UCLI=list(CLI[[1]])
+		kk=length(CLI)
+		for (k in 2:kk) UCLI=c(UCLI,list(union(UCLI[[k-1]],CLI[[k]])))
 		UCLI
 		UCLIS=list(c(1))
-		for (k in 2:kk) UCLIS=c(UCLIS,list(intersect(CLIB[[k]],UCLI[[k-1]])))
+		for (k in 2:kk) UCLIS=c(UCLIS,list(intersect(CLI[[k]],UCLI[[k-1]])))
 		UCLIS
 
 		bb=0
 		for (k in 2:kk) { 
 				b=1
 				for (j in 1:(k-1)) {
-						b=min(b,length(setdiff(UCLIS[[k]],CLIB[[j]])))
+						b=min(b,length(setdiff(UCLIS[[k]],CLI[[j]])))
 						if (b==0) {
 								break
 						}
@@ -129,28 +155,7 @@ CHECK1=function(CLIB)
 		bb
 		if (bb==0) {bbb=1}
 		if (bb>0) {bbb=0}
-		return(list(bbb=bbb))
-}
-
-#' rCLI
-#'
-#' We draw a random permutation of cliques from CLI and accept it only if it is perfect
-#' @param CLIQUES Description of the parameter
-#' @keywords A
-#' @export 
-#' @examples
-#' rancli(CLIQUES)
-rCLI=function(CLI) {
-		UU=0
-		while (UU==0)
-		{
-				nn=length(CLI)
-				v=sample(1:nn,nn) # random permutation
-				CCC=list()
-				for (i in v) CCC=c(CCC,list(CLI[[i]]))
-				UU=CHECK1(CCC)$bbb
-		}
-		return(list(CCC=CCC))
+		return(bbb)
 }
 
 #' Wmat
@@ -335,7 +340,7 @@ get.all.POCs <- function(CLIQUES, method)
     }
     if (method=='check.all')
     {
-        POCs=list()
+        POCs=c()
         all.permutations=permn(1:length(CLIQUES))
         if (length(all.permutations)==2) POCs=list(c(1,2), c(2,1))
         else
@@ -345,11 +350,10 @@ get.all.POCs <- function(CLIQUES, method)
                     perm.i=all.permutations[[i]]
                     if (perm.i[1] < perm.i[2] & length(perm.i)>2)
                     {
-                        if (CHECK1(CLIQUES[perm.i])$bbb) POCs=c(POCs,perm.i, perm.i[c(2,1,3:length(perm.i))]);
+                        if (CHECK1(CLIQUES[perm.i])) POCs=rbind(POCs,perm.i, perm.i[c(2,1,3:length(perm.i))]);
                     }
                 }
             }
-        POCs=matrix(unlist(POCs),ncol=length(CLIQUES), byrow=TRUE)
     }
     return(POCs)
 }
@@ -415,7 +419,7 @@ get.single.POC <- function(CLIQUES)
 is.decomposable <- function(CLIQUES)
 {
 		POC.candidate=get.single.POC.wrapper(CLIQUES)
-		return(CHECK1(CLIQUES[POC.candidate])$bbb==1)
+		return(CHECK1(CLIQUES[POC.candidate]))
 }
 
 #' rPOC
@@ -478,7 +482,7 @@ rPOC_unif<-function(n,CLIQUES,method='recurrent', replace=TRUE)
             while (counter<=n)
             {
                 POC.candidate=sample(1:length(CLIQUES))
-                if (CHECK1(CLIQUES[POC.candidate])$bbb)
+                if (CHECK1(CLIQUES[POC.candidate]))
                 {
                     nPOCs[counter,]=POC.candidate
                     counter=counter+1
@@ -497,7 +501,7 @@ rPOC_unif<-function(n,CLIQUES,method='recurrent', replace=TRUE)
             while (counter<=n)
             {
                 POC.candidate=unlist(sample(all.permutations,1))
-                if (!(list(POC.candidate) %in% nPOCs) && CHECK1(CLIQUES[POC.candidate])$bbb)
+                if (!(list(POC.candidate) %in% nPOCs) && CHECK1(CLIQUES[POC.candidate]))
                 {
                     nPOCs[counter,]=POC.candidate
                     counter=counter+1
