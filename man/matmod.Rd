@@ -2,9 +2,9 @@
 % Please edit documentation in R/poc_functions.R
 \name{matmod}
 \alias{matmod}
-\title{matmod_new}
+\title{matmod}
 \usage{
-matmod(W, A, CLI = CLI)
+matmod(W, A)
 }
 \arguments{
 \item{A}{Description of the parameter}

@@ -4,7 +4,7 @@
 \alias{Get.ALLPOCs.graph}
 \title{Get.ALLPOCs.graph}
 \usage{
-Get.ALLPOCs.graph(POClist, prefix = "")
+Get.ALLPOCs.graph(POClist, prefix = "", background = FALSE)
 }
 \arguments{
 \item{A}{Description of the parameter}

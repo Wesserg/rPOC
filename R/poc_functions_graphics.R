@@ -24,9 +24,10 @@ add.alpha <- function(col, alpha=1){
 #' Get.graph(CLIQUES, draw=TRUE)
 Get.graph<-function(CLIQUES, draw=FALSE, prefix='')
 {
-    edges=unique(matrix(unlist(lapply(CLIQUES, function(CLIQUE) combn(CLIQUE,2))),ncol=2, byrow=T))
+    edges=unique(matrix(unlist(lapply(CLIQUES, function(CLIQUE) combn(sort(CLIQUE),2))),ncol=2, byrow=T))
+    print(edges)
     nodes=sort(unique(unlist(CLIQUES)))
-    G = graph.data.frame(edges, nodes, directed=F)
+    G = graph.data.frame(edges, nodes, directed=FALSE)
 
     if (draw)
     {
@@ -36,7 +37,8 @@ Get.graph<-function(CLIQUES, draw=FALSE, prefix='')
              mark.col=add.alpha(brewer.pal(length(CLIQUES),"Set3"),0.5),
              mark.border=NA,
              vertex.color='white',
-             vertex.size=15,
+             vertex.size=20,
+             vertex.label.cex=2,
              vertex.frame.color='black',
              edge.color='black',
              edge.width=2)
@@ -46,7 +48,7 @@ Get.graph<-function(CLIQUES, draw=FALSE, prefix='')
     return(G)
 }
 
-#v' Get.weighted.clique.graph
+#' Get.weighted.clique.graph
 #'
 #' Add an alpha value to a colour
 #' @param A Description of the parameter
@@ -62,14 +64,14 @@ Get.weighted.clique.graph<-function(CLIQUES, draw=FALSE, prefix='')
     {
         png(paste('Figures/',prefix,'_WCG.png', sep="", collapse=""), height=1024, width=1024)
         plot(WCG,
-             vertex.color=add.alpha(brewer.pal(length(CLIQUES),"Set3"),0.75),
-             vertex.size=prop_to_size(unlist(lapply(CLIQUES,length))*2,10,20,1),
+             vertex.color=add.alpha(brewer.pal(length(CLIQUES),"Set3"),1),
+             vertex.size=prop_to_size(unlist(lapply(CLIQUES,length))*2,20,40,1),
              vertex.frame.color='black',
              vertex.label.cex=2,
              vertex.label.color='black',
              vertex.label=paste('C',V(WCG), sep=""),
              edge.color=add.alpha('black',0.5),
-             edge.width=prop_to_size(E(WCG)$weight*2,10,20,1),
+             edge.width=prop_to_size(E(WCG)$weight*2,20,40,1),
              edge.label=E(WCG)$weight,
              edge.label.cex=3,
              edge.label.color='black')
@@ -80,6 +82,53 @@ Get.weighted.clique.graph<-function(CLIQUES, draw=FALSE, prefix='')
     return(WCG)
 }
 
+#' Get.reduced.weighted.clique.graph
+#'
+#' Add an alpha value to a colour
+#' @param A Description of the parameter
+#' @keywords A
+#' @export 
+#' @examples
+#' Get.reduced.weighted.clique.graph(CLIQUES, draw=TRUE)
+Get.reduced.weighted.clique.graph<-function(CLIQUES, draw=FALSE, prefix='')
+{
+    W=Wmat(CLIQUES)
+    WCG=graph_from_adjacency_matrix(W, mode =  "undirected", weighted = TRUE)
+    RW=matmod(W,c())
+    RWCG=graph_from_adjacency_matrix(RW, mode =  "undirected", weighted = TRUE)
+
+    removable_edges=which(W-RW>0, arr.ind=TRUE)
+    E(WCG)$color=add.alpha('black',0.5)
+    WCG_edges=get.edgelist(WCG)
+    removable_edges_id=c()
+    if (dim(removable_edges)[1]>0)
+    {
+        removable_edges_id=which(apply(WCG_edges,1,function(WCG_edge) apply(removable_edges, 1, function(removable_edge) all(WCG_edge==removable_edge))), arr.ind=TRUE)[,2]
+    }
+
+    E(WCG)[removable_edges_id]$color=add.alpha('red',0.5)
+    if (draw)
+    {
+        png(paste('Figures/',prefix,'_RWCG.png', sep="", collapse=""), height=1024, width=1024)
+        plot(WCG,
+             vertex.color=add.alpha(brewer.pal(length(CLIQUES),"Set3"),1),
+             vertex.size=prop_to_size(unlist(lapply(CLIQUES,length))*2,20,40,1),
+             vertex.frame.color='black',
+             vertex.label.cex=2,
+             vertex.label.color='black',
+             vertex.label=paste('C',V(WCG), sep=""),
+             edge.color=E(WCG)$color, #add.alpha('black',0.5),
+             edge.width=prop_to_size(E(WCG)$weight*2,20,40,1),
+             edge.label=E(WCG)$weight,
+             edge.label.cex=3,
+             edge.label.color='black')
+        dev.off()
+
+    }
+    
+    return(RWCG)
+}
+
 #' Get.ALLPOCs.graph
 #'
 #' Add an alpha value to a colour
@@ -88,7 +137,7 @@ Get.weighted.clique.graph<-function(CLIQUES, draw=FALSE, prefix='')
 #' @export 
 #' @examples
 #' Get.ALLPOCs.graph(CLIQUES, draw=TRUE)
-Get.ALLPOCs.graph<-function(POClist, prefix='')
+Get.ALLPOCs.graph<-function(POClist, prefix='', background=FALSE)
 {
     dim.scaling=max(512,256*sqrt(dim(POClist)[1]))
     L=t(apply(POClist,1,function(POC) sapply(length(POC):1, function(i) paste(c(POC[1:i]), collapse=""))))
@@ -102,6 +151,14 @@ Get.ALLPOCs.graph<-function(POClist, prefix='')
     nodes=cbind(nodes,sapply(nodes, function(x) substring(x,1,1)),sapply(nodes, function(x) nchar(x)))
     nodes=rbind(nodes, c(' ',"8","0.5"))
     colnames(nodes)=c('nodes','group.label','level')
+
+    if (background)
+    {
+        all.permutations=matrix(unlist(permn(1:dim(POClist)[2])),ncol=dim(POClist)[2], byrow=T)
+        print(all.permutations)
+        add_sequence=apply(all.permutations, 1, function(permutation)any(apply(POClist,1, function(POC) permutation==POC)))
+        print(add_sequence)
+    }
 
     G = graph.data.frame(edges, nodes, directed=F)
     G=add_edges(G, unlist(lapply(1:dim(POClist)[2], function(i) c(" ",paste(i)))), freq=sum(edges[,'freq']) )

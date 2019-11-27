@@ -2,7 +2,7 @@
 % Please edit documentation in R/poc_functions_graphics.R
 \name{Get.weighted.clique.graph}
 \alias{Get.weighted.clique.graph}
-\title{Add an alpha value to a colour}
+\title{Get.weighted.clique.graph}
 \usage{
 Get.weighted.clique.graph(CLIQUES, draw = FALSE, prefix = "")
 }
