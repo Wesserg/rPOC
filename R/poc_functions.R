@@ -107,17 +107,17 @@ poc1=function(n) {
 is.POC=function(CLIQUES)
 {
 		K=length(CLIQUES)
-    UCLI=lapply(1:K, function(k) unique(unlist(CLIQUES[1:k])))
-    UCLIS=lapply(2:K, function(k) intersect(CLIQUES[[k]], UCLI[[k-1]]))
+		UCLI=lapply(1:K, function(k) unique(unlist(CLIQUES[1:k])))
+		UCLIS=lapply(2:K, function(k) intersect(CLIQUES[[k]], UCLI[[k-1]]))
 
 		for (j in 1:(K-1))
-    {
+		{
 				for (i in 1:j)
-        {
-            ij_condition=prod(UCLIS[[j]] %in% CLIQUES[[i]])==1
-            if (ij_condition) break;
+				{
+						ij_condition=prod(UCLIS[[j]] %in% CLIQUES[[i]])==1
+						if (ij_condition) break;
 				}
-        if (!(ij_condition)) return(FALSE);
+				if (!(ij_condition)) return(FALSE);
 		}
 		return(TRUE)
 }
@@ -132,17 +132,17 @@ is.POC=function(CLIQUES)
 #' Wmat(CLIQUES)
 Wmat=function(CLI)
 {
-    K=length(CLI)
-    W=array(0,c(K,K))
-    for (i in 1:(K-1))
-    {
-        for (j in (i+1):K)
-        {
-            W[i,j]=length(intersect(CLI[[i]],CLI[[j]]))
-        }
-    }
-    W=W+t(W)
-    return(W)
+		K=length(CLI)
+		W=array(0,c(K,K))
+		for (i in 1:(K-1))
+		{
+				for (j in (i+1):K)
+				{
+						W[i,j]=length(intersect(CLI[[i]],CLI[[j]]))
+				}
+		}
+		W=W+t(W)
+		return(W)
 }
 #' matmod
 #'
@@ -154,88 +154,99 @@ Wmat=function(CLI)
 #' matmod(W,R,CLI)
 matmod=function(W,A)
 {
-    K=dim(W)[1]
-    W.not_in.A=array(TRUE, c(K,K)) #initialize as if all edges are not in A
-    if (length(A)>1) #Find edges in A and mark with "FALSE"
-    {
-        all.A.pairs=t(combn(A,2))
-        W.not_in.A[all.A.pairs]=FALSE 
-        W.not_in.A=W.not_in.A & t(W.not_in.A) #Make it symmetric
-    }
-    sorted.unique.weights=sort(unique(as.vector(W)))[-1] #Only iterate over actually present weights
-    for (w in sorted.unique.weights)
-    {
-        W.less_w=(W < w)
-        W2=W.less_w & W.not_in.A #Removing candidates on level 'k'
-        W1=(W2==FALSE) #Not removable
-        W1_m=W1
-        m=1
-        while (m  < (K-1))
-        {
-            m=m+1
-            W1_m=W1_m%*%W1
-            W[W2*W1_m>0]=0 #remove edge if there exists a path of length m that goes through non-removable edges on level k
-        }
-    }
-    return(W)
+		K=dim(W)[1]
+		W.not_in.A=array(TRUE, c(K,K)) #initialize as if all edges are not in A
+		if (length(A)>1) #Find edges in A and mark with "FALSE"
+		{
+				all.A.pairs=t(combn(A,2))
+				W.not_in.A[all.A.pairs]=FALSE 
+				W.not_in.A=W.not_in.A & t(W.not_in.A) #Make it symmetric
+		}
+		sorted.unique.weights=sort(unique(as.vector(W)))[-1] #Only iterate over actually present weights
+		for (w in sorted.unique.weights)
+		{
+				W.less_w=(W < w)
+				W2=W.less_w & W.not_in.A #Removing candidates on level 'k'
+				W1=(W2==FALSE) #Not removable
+				W1_m=W1
+				m=1
+				while (m	< (K-1))
+				{
+						m=m+1
+						W1_m=W1_m%*%W1
+						W[W2*W1_m>0]=0 #remove edge if there exists a path of length m that goes through non-removable edges on level k
+				}
+		}
+		return(W)
 }
 
-#' RECURSION.POC.SEARCH
+#' RCM
 #'
-#' THE CORE OF THE RECURSION WHICH PRINTS ALL PERFECT ORDERING OF "CLIQUES" IS FUNCTION: "RECURSION.POC.SEARCH" THE FUNCTION "RECURSION.POC.SEARCH.WRAPPER"	 JUST SETS THE STAGE	
+#' THE CORE OF THE RCM WHICH PRINTS ALL PERFECT ORDERING OF "CLIQUES" IS FUNCTION: "RCM" THE FUNCTION "RCM.WRAPPER"	 JUST SETS THE STAGE	
 #' @param W Description of the parameter
 #' @keywords W
 #' @export 
 #' @examples
-#' RECURSION.POC.SEARCH(...)
-RECURSION.POC.SEARCH <- function(W, W.labels, o.k)
+#' RCM(...)
+RCM <- function(W, o.k)
 {
-	K=dim(W)[1]
-	B=W
-	o.k.c=setdiff(1:K, o.k)
-	if (length(o.k)>0 & length(o.k.c)<K)
-	{
-		W=matmod(W,o.k) # killing the unwanted choices of cliques with respect to o.k 
-		B=W[o.k,o.k.c, drop=F] # creates the matrix with columns labels of cliques not-chosen yet
-	}
-	B.ColSum=colSums(B) # sums of columns in B
-	B.labels=W.labels[o.k.c] # labels of cliques which have not been chosen yet
-	for (j in B.labels[B.ColSum>0])
-	{
-			o.k.j=c(o.k,j) # vector of labels of already chosen cliques
-			if (length(o.k.j)==(K-1) & o.k.j[1] < o.k.j[2])
-			{
-          ## Using the fact that permutation of initial two elements of POC yields also a POC
-          o.k.j=c(o.k.j, setdiff(1:K, o.k.j))
-          assign("all.POCs", c(all.POCs, o.k.j),envir = .GlobalEnv)
-          assign("all.POCs", c(all.POCs, o.k.j[c(2,1,3:K)]),envir = .GlobalEnv)
-			}
-      ## Using the fact that permutation of initial two elements of POC yields also a POC
-			if (length(o.k.j)<2) RECURSION.POC.SEARCH(W,W.labels, o.k=o.k.j); # recursion step if o.k.j has single clique
-			if (length(o.k.j)>=2 & o.k.j[1] < o.k.j[2]) RECURSION.POC.SEARCH(W,W.labels, o.k=o.k.j); # recursion step. ensuring we will not double the outcomes with investigating only one order of initial two elements of a POC
-	}
+		K=dim(W)[1]
+		if (K==2)
+		{
+				## Using the fact that permutation of initial two elements of POC yields also a POC
+				o.k.final=unlist(lapply(strsplit(paste(colnames(W), collapse=""),"")[[1]], as.numeric))
+				assign("all.POCs", c(all.POCs, o.k.final),envir = .GlobalEnv) 
+				assign("all.POCs", c(all.POCs, o.k.final[c(2,1,3:length(o.k.final))]),envir = .GlobalEnv)
+		}
+		## Using the fact that permutation of initial two elements of POC yields also a POC
+		B=W
+		B.labels=colnames(W)
+		if (length(o.k)>0)
+		{
+				W=matmod(W,o.k) # killing the unwanted choices of cliques with respect to o.k 
+				B=W[o.k,-o.k, drop=F] # creates the matrix with columns labels of cliques not-chosen yet
+				B.labels=B.labels[-o.k, drop=F] # labels of cliques which have not been chosen yet
+		}
+		if (length(o.k)>=2)
+		{
+				collapsed_weights=apply(W[o.k, -o.k, drop=F],2, max)
+				collapsed_names = c(paste(colnames(W)[o.k], collapse=""),colnames(W)[-o.k])
+				W=rbind(c(0, collapsed_weights), cbind( collapsed_weights, W[-o.k, -o.k, drop=F]))
+				colnames(W) = collapsed_names
+				rownames(W) = collapsed_names
+				o.k=c(1)
+		}
+		B.ColSum=colSums(B) # sums of columns in B
+		for (j in B.labels[B.ColSum>0])
+		{
+				o.k.j=c(o.k,which(colnames(W)==j)) # vector of labels of already chosen cliques inlcuding possibly collapsed clique
+				if (length(o.k.j)<2 & K >1) RCM(W, o.k=o.k.j); # RCM step if o.k.j has single clique
+				if (length(o.k.j)>1 & o.k.j[1] < o.k.j[2] & K>1) RCM(W, o.k=o.k.j); # RCM step. ensuring we will not double the outcomes with investigating only one order of initial two elements of a POC
+		}
 }
 
-#' RECURSION.POC.SEARCH.WRAPPER
+#' RCM.WRAPPER
 #'
-#' THE CORE OF THE RECURSION WHICH PRINTS ALL PERFECT ORDERING OF "CLIQUES" IS FUNCTION: "RECURSION.POC.SEARCH" THE FUNCTION "RECURSION.POC.SEARCH.WRAPPER"	 JUST SETS THE STAGE	
+#' THE CORE OF THE RCM WHICH PRINTS ALL PERFECT ORDERING OF "CLIQUES" IS FUNCTION: "RCM" THE FUNCTION "RCM.WRAPPER"	 JUST SETS THE STAGE	
 #' @param A Description of the parameter
 #' @keywords A
 #' @export 
 #' @examples
-#' RECURSION.POC.SEARCH.WRAPPER(...)
-RECURSION.POC.SEARCH.WRAPPER <- function(CLIQUES)
+#' RCM.WRAPPER(...)
+RCM.WRAPPER <- function(CLIQUES)
 {
-    assign("all.POCs", c(), envir = .GlobalEnv)
-    W=Wmat(CLIQUES)
-    W.labels=col(W)[1,]
-    o.k=c()
-    K=length(CLIQUES)
-    if (K==1) return(matrix(c(1),1,1));
-    if (K==2) return(matrix(c(1,2,2,1),2,2));
-    out=RECURSION.POC.SEARCH(W, W.labels, o.k)
-    POCs=matrix(all.POCs, ncol=K, byrow=TRUE)
-    return(POCs)
+		assign("all.POCs", c(), envir = .GlobalEnv)
+    assign("all.PROBSs", c(), envir = .GlobalEnv)
+
+		K=length(CLIQUES)
+		if (K==1) return(matrix(c(1),1,1));
+		if (K==2) return(matrix(c(1,2,2,1),2,2));
+		W=Wmat(CLIQUES)
+		colnames(W)=1:dim(W)[1]
+		out=RCM(W=W, o.k=c())
+		POCs=matrix(all.POCs, ncol=K, byrow=TRUE)
+
+		return(POCs)
 }
 
 #' get.all.POCs
@@ -248,84 +259,100 @@ RECURSION.POC.SEARCH.WRAPPER <- function(CLIQUES)
 #' get.all.POCs(...)
 get.all.POCs <- function(CLIQUES, method)
 {
-    K=length(CLIQUES)
-    if (method=='recursion')
-    {
-        POCs=RECURSION.POC.SEARCH.WRAPPER(CLIQUES)
-    }
-    if (method=='rejection')
-    {
-        POCs=c()
-        all.permutations=permn(1:K)
-        if (length(all.permutations)==2) POCs=list(c(1,2), c(2,1))
-        else
-            {
-                for (i in 1:factorial(K))
-                {
-                    perm.i=all.permutations[[i]]
-                    if (perm.i[1] < perm.i[2] & length(perm.i)>2)
-                    {
-                        if (is.POC(CLIQUES[perm.i])) POCs=rbind(POCs,perm.i, perm.i[c(2,1,3:length(perm.i))]);
-                    }
-                }
-            }
-    }
-    return(POCs)
+		K=length(CLIQUES)
+		if (method=='RCM')
+		{
+				POCs=RCM.WRAPPER(CLIQUES)
+		}
+		if (method=='rejection')
+		{
+				POCs=c()
+				all.permutations=permn(1:K)
+				if (length(all.permutations)==2) POCs=list(c(1,2), c(2,1))
+				else
+						{
+								for (i in 1:factorial(K))
+								{
+										perm.i=all.permutations[[i]]
+										if (perm.i[1] < perm.i[2] & length(perm.i)>2)
+										{
+												if (is.POC(CLIQUES[perm.i])) POCs=rbind(POCs,perm.i, perm.i[c(2,1,3:length(perm.i))]);
+										}
+								}
+						}
+		}
+		return(POCs)
 }
 
 
-#' single.POC
+#' single.RCM
 #'
-#' single.POC descroption
+#' single.RCM descroption
 #' @param A Description of the parameter
 #' @keywords A
 #' @export 
 #' @examples
-#' single.POC(...)
-single.POC <- function(W, W.labels, o.k, CLIQUES, prob)
+#' single.RCM(...)
+single.RCM <- function(W, o.k,prob)
 {
-		K=length(CLIQUES)
+    K=dim(W)[1]
+		if (K==2)
+		{
+				## Using the fact that permutation of initial two elements of POC yields also a POC
+				poc=unlist(lapply(strsplit(paste(colnames(W), collapse=""),"")[[1]], as.numeric))
+				assign("POC",poc, envir=.GlobalEnv)
+				assign("PROB",c(prod(prob),prob), envir=.GlobalEnv)
+		}
+
+    		## Using the fact that permutation of initial two elements of POC yields also a POC
 		B=W
-		o.k.c=setdiff(1:K, o.k)
-		if (length(o.k)>0 & length(o.k.c)<K)
+		B.labels=colnames(W)
+		if (length(o.k)>0)
 		{
 				W=matmod(W,o.k) # killing the unwanted choices of cliques with respect to o.k 
-				B=W[o.k,o.k.c, drop=F] # creates the matrix with columns labels of cliques not-chosen yet
+				B=W[o.k,-o.k, drop=F] # creates the matrix with columns labels of cliques not-chosen yet
+				B.labels=B.labels[-o.k, drop=F] # labels of cliques which have not been chosen yet
+		}
+		if (length(o.k)>=2)
+		{
+				collapsed_weights=apply(W[o.k, -o.k, drop=F],2, max)
+				collapsed_names = c(paste(colnames(W)[o.k], collapse=""),colnames(W)[-o.k])
+				W=rbind(c(0, collapsed_weights), cbind( collapsed_weights, W[-o.k, -o.k, drop=F]))
+				colnames(W) = collapsed_names
+				rownames(W) = collapsed_names
+				o.k=c(1)
 		}
 		B.ColSum=colSums(B) # sums of columns in B
-		B.labels=W.labels[o.k.c] # labels of cliques which have not been chosen yet
-    if (length(B.labels[B.ColSum>0])==1) j=B.labels[B.ColSum>0];
-    if (length(B.labels[B.ColSum>0])>1)
-    {
-        B.temp=B.labels[B.ColSum>0]
-        j = sample(B.temp,1);
-        prob=prob*1/length(B.temp)
-    }
-    o.k.j=c(o.k,j) # vector of labels of already chosen cliques
-    if (length(o.k.j)==(K-1))
-    {
-        o.k.j=c(o.k.j, setdiff(1:K, o.k.j))
-        POC<<-o.k.j
-        PROB<<-prob
-    }
-    if (length(o.k.j)<(K-1)) single.POC(W,W.labels, o.k=o.k.j, CLIQUES, prob=prob); # recursion step
-}
+    B0.labels=B.labels[B.ColSum>0]
+    B0.len=length(B0.labels)
+    if (B0.len==1) j=B.labels[B.ColSum>0];
+    if (B0.len> 1) j=sample(B0.labels,1)
+    prob = c(prob, 1/B0.len)
+    o.k.j=c(o.k,which(colnames(W)==j)) # vector of labels of already chosen cliques inlcuding possibly collapsed clique
 
-#' get.single.POC
+    if (length(o.k.j)<2 & K >1) single.RCM(W, o.k=o.k.j, prob=prob); # RCM step if o.k.j has single clique
+    if (length(o.k.j)>1 & K>1) single.RCM(W, o.k=o.k.j, prob=prob); # RCM step. ensuring we will not double the outcomes with investigating only one order of initial two elements of a POC
+		}
+
+#' single.RCM.WRAPPER
 #'
-#' get.single.POC descroption
+#' single.RCM.WRAPPER descroption
 #' @param A Description of the parameter
 #' @keywords A
 #' @export 
 #' @examples
-#' get.single.POC(...)
-get.single.POC <- function(CLIQUES)
+#' single.RCM.WRAPPER(...)
+single.RCM.WRAPPER <- function(CLIQUES)
 {
-		W=Wmat(CLIQUES)
-		W.labels=col(W)[1,]
-		o.k=c()
-    assign("PROB", 1, envir = .GlobalEnv)
-		single.POC(W, W.labels, o.k, CLIQUES, prob=PROB)
+
+    assign("POC", c(), envir = .GlobalEnv)
+		assign("PROB", 1, envir = .GlobalEnv)
+    K=length(CLIQUES)
+		if (K==1) return(c(c(1),1));
+		if (K==2) return(list(c(c(1,2),c(2,1))[rbinom(1,1,prob=0.5)+1],0.5));
+    W=Wmat(CLIQUES)
+    colnames(W)=1:dim(W)[1]
+		single.RCM(W=W, o.k=c(), prob=c())
 		return(list(POC, PROB))
 }
 
@@ -337,36 +364,36 @@ get.single.POC <- function(CLIQUES)
 #' @export 
 #' @examples
 #' rPOC.unif(1,CLIQUES)
-rPOC_recursion <- function(n,CLIQUES,method='recursion', replace=TRUE)
+rPOC_RCM <- function(n,CLIQUES,method='RCM', replace=TRUE)
 {
-    nPOCs=list()
-    if (method=='recursion')
-    {
-        if (replace)
-        {
-            nPOCs=replicate(n,get.single.POC(CLIQUES)[[1]])
-        }
-        if (!(replace))
-        {
-            if (n>factorial(length(CLIQUES)))
-            {
-                return(nPOCs)
-            }
-            counter=1
-            while (counter<=n)
-            {
-                POC.candidate=get.single.POC(CLIQUES)[[1]]
-                if (!(list(POC.candidate) %in% nPOCs))
-                {
-                    nPOCs[[counter]]=POC.candidate
-                    counter=counter+1
-                }
-            }
+		nPOCs=list()
+		if (method=='RCM')
+		{
+				if (replace)
+				{
+						nPOCs=replicate(n,single.RCM.WRAPPER(CLIQUES)[[1]])
+				}
+				if (!(replace))
+				{
+						if (n>factorial(length(CLIQUES)))
+						{
+								return(nPOCs)
+						}
+						counter=1
+						while (counter<=n)
+						{
+								POC.candidate=single.RCM.WRAPPER(CLIQUES)[[1]]
+								if (!(list(POC.candidate) %in% nPOCs))
+								{
+										nPOCs[[counter]]=POC.candidate
+										counter=counter+1
+								}
+						}
 
-        }
+				}
 
-    }
-    return(nPOCs)
+		}
+		return(nPOCs)
 }
 
 #' rPOC_unif
@@ -377,84 +404,84 @@ rPOC_recursion <- function(n,CLIQUES,method='recursion', replace=TRUE)
 #' @export 
 #' @examples
 #' rPOC.unif(1,CLIQUES)
-rPOC_unif<-function(n,CLIQUES,method='recursion', replace=TRUE, mh_burn=100)
+rPOC_unif<-function(n,CLIQUES,method='RCM', replace=TRUE, mh_burn=100)
 {
-    ## it should return an array of POCs of size (n, len(Cliques))
-    K=length(CLIQUES)
-    nPOCs=array(0,c(n, K))
-    if (method=='rejection')
-    {
-        if (replace)
-        {
-            counter=1
-            while (counter<=n)
-            {
-                POC.candidate=sample(1:K)
-                if (is.POC(CLIQUES[POC.candidate]))
-                {
-                    nPOCs[counter,]=POC.candidate
-                    counter=counter+1
-                }
-            }
-        }
-        if (!(replace))
-        {
-            if (n>factorial(K))
-            {
-                print('Warning: sampling space smaller than sample size')
-                return(nPOCs)
-            }
-            all.permutations=permn(1:K)
-            counter=1
-            while (counter<=n)
-            {
-                POC.candidate=unlist(sample(all.permutations,1))
-                if (!(list(POC.candidate) %in% nPOCs) && is.POC(CLIQUES[POC.candidate]))
-                {
-                    nPOCs[counter,]=POC.candidate
-                    counter=counter+1
-                }
-            }
+		## it should return an array of POCs of size (n, len(Cliques))
+		K=length(CLIQUES)
+		nPOCs=array(0,c(n, K))
+		if (method=='rejection')
+		{
+				if (replace)
+				{
+						counter=1
+						while (counter<=n)
+						{
+								POC.candidate=sample(1:K)
+								if (is.POC(CLIQUES[POC.candidate]))
+								{
+										nPOCs[counter,]=POC.candidate
+										counter=counter+1
+								}
+						}
+				}
+				if (!(replace))
+				{
+						if (n>factorial(K))
+						{
+								print('Warning: sampling space smaller than sample size')
+								return(nPOCs)
+						}
+						all.permutations=permn(1:K)
+						counter=1
+						while (counter<=n)
+						{
+								POC.candidate=unlist(sample(all.permutations,1))
+								if (!(list(POC.candidate) %in% nPOCs) && is.POC(CLIQUES[POC.candidate]))
+								{
+										nPOCs[counter,]=POC.candidate
+										counter=counter+1
+								}
+						}
 
-        }
+				}
 
-    }
-    if (method=='recursion')
-    {
-        POCs=RECURSION.POC.SEARCH.WRAPPER(CLIQUES)
-        if (replace)
-        {
-            nPOCs=POCs[sample(1:dim(POCs)[1],n, replace=TRUE),,drop=FALSE]
-        }
-        if (!(replace))
-        {
-            nPOCs=POCs[sample(1:dim(POCs)[1],n, replace=FALSE),,drop=FALSE]
-        }
-    }
+		}
+		if (method=='RCM')
+		{
+				POCs=RCM.WRAPPER(CLIQUES)
+				if (replace)
+				{
+						nPOCs=POCs[sample(1:dim(POCs)[1],n, replace=TRUE),,drop=FALSE]
+				}
+				if (!(replace))
+				{
+						nPOCs=POCs[sample(1:dim(POCs)[1],n, replace=FALSE),,drop=FALSE]
+				}
+		}
 
-    if (method=="M-H")
-    {
-        if (replace)
-        {
-            nPOCs=t(replicate(n,get.MH.poc(CLIQUES,mh_burn)))
+		if (method=="M-H")
+		{
+				if (replace)
+				{
+						nPOCs=t(replicate(n,get.MH.poc(CLIQUES,mh_burn)))
 
-        }
-        if(!(replace))
-        {
-            while (counter<=n)
-        {
-            POC.candidate=get.MH.poc(CLIQUES,mh_burn)
-            if (!(list(POC.candidate) %in% nPOCs))
-            {
-                nPOCs[counter,]=POC.candidate
-                counter=counter+1
-            }
-        }
-        }
+				}
+				if(!(replace))
+				{
+						while (counter<=n)
+				{
+						POC.candidate=get.MH.poc(CLIQUES,mh_burn)
+						if (!(list(POC.candidate) %in% nPOCs))
+						{
+								nPOCs[counter,]=POC.candidate
+								counter=counter+1
+						}
+				}
+				}
 
-    }
+		}
 
-    return(nPOCs)
+		return(nPOCs)
 }
 
 #' get.MH.poc
@@ -465,18 +492,32 @@ rPOC_unif<-function(n,CLIQUES,method='recursion', replace=TRUE, mh_burn=100)
 #' @export 
 #' @examples
 #' get.MH.poc(CLIQUES,1000)
-get.MH.poc<-function(CLIQUES, mh_burn=100)
+get.MH.poc<-function(CLIQUES, mh_burn=10)
 {
-    sigma_and_prob=get.single.POC(CLIQUES)
-    sigma=sigma_and_prob[[1]]
-    prob_sigma=sigma_and_prob[[2]]
-    for (i in 1:mh_burn)
-    {
-        tau_and_prob=get.single.POC(CLIQUES)
-        tau=tau_and_prob[[1]]
-        prob_tau=tau_and_prob[[2]]
-        alpha=min(1, prob_sigma/prob_tau)
-        sigma=list(sigma, tau)[[sample(1:2, 1,prob=c(1-alpha, alpha))]]
-    }
-    return(sigma)
+		sigma_and_prob=single.RCM.WRAPPER(CLIQUES)
+		sigma=sigma_and_prob[[1]]
+		prob_sigma=sigma_and_prob[[2]][1]
+		for (i in 1:mh_burn)
+		{
+				tau_and_prob=single.RCM.WRAPPER(CLIQUES)
+				tau=tau_and_prob[[1]]
+				prob_tau=tau_and_prob[[2]]
+				alpha=min(1, prob_sigma/prob_tau)
+				sigma=list(sigma, tau)[[sample(1:2, 1,prob=c(1-alpha, alpha))]]
+		}
+		return(sigma)
+}
+
+
+#' is.decomposable
+#'
+#' is.decomposable description
+#' @param n Description of the parameter
+#' @keywords random sample
+#' @export 
+#' @examples
+#' is.decomposable(CLIQUES)
+is.decomposable <- function(CLIQUES)
+{
+    return()
 }

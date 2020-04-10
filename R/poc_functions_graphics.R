@@ -28,20 +28,31 @@ Get.graph<-function(CLIQUES, draw=FALSE, prefix='')
     print(edges)
     nodes=sort(unique(unlist(CLIQUES)))
     G = graph.data.frame(edges, nodes, directed=FALSE)
-
+    nCLIQUES=length(CLIQUES)
+    CLIQUE.strings=lapply(
+        1:nCLIQUES,
+        function(i)
+            paste('C',i,' = ( ', paste(CLIQUES[[i]], collapse=' '), ' )', sep='',collapse=''))
+ 
     if (draw)
     {
         png(paste('Figures/',prefix,'_G.png', sep="", collapse=""), height=1024, width=1024)
         plot(G,
              mark.groups=CLIQUES,
-             mark.col=add.alpha(brewer.pal(length(CLIQUES),"Set3"),0.5),
+             mark.col=add.alpha(brewer.pal(nCLIQUES,"Set3"),0.5),
              mark.border=NA,
              vertex.color='white',
              vertex.size=20,
              vertex.label.cex=2,
              vertex.frame.color='black',
              edge.color='black',
-             edge.width=2)
+             edge.width=2,
+             main=paste(CLIQUE.strings
+                 ,
+                   collapse=', '),
+             main.cex=2
+             )
+        legend('topleft', legend=CLIQUE.strings, cex=2)
         dev.off()
 
     }

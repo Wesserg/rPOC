@@ -4,8 +4,7 @@
 \alias{rPOC_unif}
 \title{rPOC_unif}
 \usage{
-rPOC_unif(n, CLIQUES, method = "recursion", replace = TRUE,
-  mh_burn = 100)
+rPOC_unif(n, CLIQUES, method = "RCM", replace = TRUE, mh_burn = 100)
 }
 \arguments{
 \item{n}{Description of the parameter}
