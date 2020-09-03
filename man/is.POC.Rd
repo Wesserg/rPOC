@@ -2,7 +2,7 @@
 % Please edit documentation in R/poc_functions.R
 \name{is.POC}
 \alias{is.POC}
-\title{CHECK1}
+\title{is.POC}
 \usage{
 is.POC(CLIQUES)
 }
@@ -13,6 +13,6 @@ is.POC(CLIQUES)
 function CHECK checks if CLIB is a perfect ordering of cliques
 }
 \examples{
-CHECK1(CLIQUES)
+is.POC(CLIQUES)
 }
 \keyword{A}

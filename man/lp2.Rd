@@ -4,7 +4,7 @@
 \alias{lp2}
 \title{lp2}
 \usage{
-lp2(A)
+lp2(A, p_min = 0.25, p_max = 0.75)
 }
 \arguments{
 \item{A}{Description of the parameter}

@@ -4,13 +4,13 @@
 \alias{lp1}
 \title{lp1}
 \usage{
-lp1(A)
+lp1(A, p_min = 0.25, p_max = 0.75)
 }
 \arguments{
 \item{A}{Description of the parameters}
 }
 \description{
-Function lp1 draws (by rejection) randomly any non-empty subset of the set 1:n with the same probability.
+Function lp1 draws (by rejection) randomly any non-empty subset of the set 1:n with the same probability. not true - it is not uniformly sampling from power set
 }
 \examples{
 lp1()

@@ -1,20 +1,18 @@
 #' lp1
 #'
-#' Function lp1 draws (by rejection) randomly any non-empty subset of the set 1:n with the same probability. 
+#' Function lp1 draws (by rejection) randomly any non-empty subset of the set 1:n with the same probability. not true - it is not uniformly sampling from power set
 #' @param A Description of the parameters
 #' @keywords A
 #' @export 
 #' @examples
 #' lp1()
-lp1=function(A) {
-	n=length(A)
-	w=c()
-	while (sum(w)==0) { # forbidding emptyset
-		v=c()
-		for (i in 1:n) {v=c(v,sample(0:1,1))} # generation of the 0-1 sequence of length n 
-		w <- v
-	}
-	return(A[w==1]) # choose from A only elements at positions in which 1 was generated
+lp1=function(A, p_min=0.25, p_max=0.75)
+{
+    n=length(A)
+    if (n==1) return(A);
+    w=c()
+    while (sum(w)==0) w=rbinom(n,1,runif(1,p_min, p_max));
+    return(A[w==1]) # choose from A only elements at positions in which 1 was generated
 }
 
 #' lp2
@@ -25,15 +23,13 @@ lp1=function(A) {
 #' @export 
 #' @examples
 #' lp2(A)
-lp2=function(A) {
-	n=length(A)
-	w=c()
-	while (sum(w)==0 | sum(w)==n) { # forbidding emptyset and the improper subset
-		v=c()
-		for (i in 1:n) {v=c(v,sample(0:1,1))} # generation of the 0-1 sequence of length n 
-		w <- v
-	}
-	return(A[w==1]) # choose from A only elements at positions in which 1 was generated
+lp2=function(A, p_min=0.25, p_max=0.75)
+{
+    n=length(A)
+    if (n==1) return(A);
+    w=c()
+    while (sum(w)==0 | sum(w)==n) w=rbinom(n,1,runif(1,p_min, p_max));
+    return(A[w==1]) # choose from A only elements at positions in which 1 was generated
 }
 
 
@@ -45,15 +41,12 @@ lp2=function(A) {
 #' @export 
 #' @examples
 #' lp3(A)
-lp3=function(A) {
-	n=length(A)
-	w=c()
-	while (sum(w)==0 | sum(w)==1) {	 # forbidding emptyset and singletons
-		v=c()
-		for (i in 1:n) {v=c(v,sample(0:1,1))} # generation of the 0-1 sequence of length n 
-		w <- v
-	}
-	return(A[w==1]) # choose from A only elements at positions in which 1 was generated
+lp3=function(A, p_min=0.25, p_max=0.75)
+{
+    n=length(A)
+    w=c()
+    while (sum(w)==1 | sum(w)==0) w=rbinom(n,1,runif(1,p_min, p_max));
+    return(A[w==1]) # choose from A only elements at positions in which 1 was generated
 }
 
 
@@ -65,30 +58,118 @@ lp3=function(A) {
 #' @export 
 #' @examples
 #' poc1(10)
-poc1=function(n) {
+poc1=function(n, p_min=0.25, p_max=0.75, structure='any')
+{
+    B=1:n
+
+    C=lp3(B, p_min, p_max) # draw the first clique
+    CLI=list(C)
+
+    B=setdiff(B,C) # what remains
+    I=length(B)
+
+    if (I==0)
+    {
+        SEP=list()
+    } # in case the first clique is the whole set the set of separators is empty
+    else
+    {
+        S=lp2(C,p_min, p_max) # otherwise draw the separator S2 from the first clique
+        SEP=list(S) # and put it on the list of separators
+    }	 
+    while (I>0)
+    { #	 proceed further only if what remains is non-empty
+        R=lp1(B,p_min, p_max) # draw subsequent residual from what remained
+        C=sort(union(S,R)) # create the subsequent clique 
+        CLI=c(CLI,list(C)) # put in on the list of cliques
+
+        B=setdiff(B,C) # what remains
+        I=length(B) # size of what remains
+        if (I==0) break  # stop if empty set remains
+        ## pick up at random one of the cliques which are on the list at present
+        if (structure=='any')
+        {
+            if (length(CLI)==1)
+            {
+                L=CLI[[1]]
+            }
+            else
+            {
+                L=sample(CLI,1)[[1]]
+            }
+        }
+        if (structure=='tree')
+        {
+         
+            L_for_SEP=lapply(1:length(CLI), function(i) setdiff(CLI[[i]], unlist(SEP)))
+            L=c()
+            if (length(L_for_SEP)==1)
+            {
+
+                L=L_for_SEP
+            }
+            else
+            {
+                while (length(L)==0) L=sample(L_for_SEP,1)[[1]];
+            }
+
+        }
+
+        if (structure=='chain')
+        {
+            L_for_SEP=lapply(1:length(CLI), function(i) setdiff(CLI[[i]], unlist(SEP)))
+            L=c()
+            if (length(L_for_SEP)==1)
+            {
+                L=L_for_SEP
+            }
+            else (length(L_for_SEP)==1)
+            {
+                while (length(L)==0) L=sample(list(L_for_SEP[[1]], L_for_SEP[[length(L_for_SEP)]]),1)[[1]];
+            }
+
+        }
+        S=lp2(L,p_min, p_max); # draw the subsequent separator from the chosen clique
+        SEP=c(SEP,list(S)) # put it on the list of separators
+    }
+    return(list(CLI=CLI,SEP=SEP))
+}
+
+#' poc1_old
+#'
+#' FUNCTION poc1 DRAWS (RANDOMLY, Non-uniformly) A PERFECT ORDERING OF CLIQUES OF n NODES	 (AND THUS A DECOMPOSABLE GRAPH) ITS OUTPUT CLI IS THE INPUT TO THE MAIN PROCEDURE
+#' @param A Description of the parameter
+#' @keywords A
+#' @export 
+#' @examples
+#' poc1_old(10)
+poc1_old=function(n, p_min=0, p_max=1) {
 	B=1:n
-	I<-n
-	C=lp3(B) # draw the first clique
+	C=lp3(B, p_min, p_max) # draw the first clique
 	CLI=list(C) # put it on the list of cliques
 	B<-setdiff(B,C) # what remains
 	I<-length(B) # size what remains
-	if (I==0) {
-		SEP=list() # in case the first clique is the whole set the set of separators is empty
-	} else {
-		S=lp2(C) # otherwise draw the separator S2 from the first clique
-		SEP=list(S) # and put it on the list of separators
+	if (I==0)
+  {
+      SEP=list()
+  } # in case the first clique is the whole set the set of separators is empty
+  else
+  {
+      S=lp2(C,p_min, p_max) # otherwise draw the separator S2 from the first clique
+      SEP=list(S) # and put it on the list of separators
 	}	 
-	while (I>0) { #	 proceed further only if what remains is non-empty
-		R=lp1(B) # draw subsequent residual from what remained
-		C=sort(union(S,R)) # create the subsequent clique 
-		CLI=c(CLI,list(C)) # put in on the list of cliques
-		B=setdiff(B,C) # what remains
-		I=length(B) # size of what remains
-		if (I==0) break # stop if empty set remains
-		k=length(CLI) # number of cliques already on the list 
-		L=sample(1:k,1) # pick up at random one of the cliques which are on the list at present
-		S=lp2(CLI[[L]]) # draw the subsequent separator from the chosen clique
-		SEP=c(SEP,list(S)) # put it on the list of separators
+	while (I>0)
+  { #	 proceed further only if what remains is non-empty
+      R=lp1(B,p_min, p_max) # draw subsequent residual from what remained
+      C=sort(union(S,R)) # create the subsequent clique 
+      CLI=c(CLI,list(C)) # put in on the list of cliques
+      B=setdiff(B,C) # what remains
+      I=length(B) # size of what remains
+      if (I==0) break # stop if empty set remains
+      k=length(CLI) # number of cliques already on the list 
+      L=sample(1:k,1) # pick up at random one of the cliques which are on the list at present
+      S=lp2(CLI[[L]],p_min, p_max) # draw the subsequent separator from the chosen clique
+      SEP=c(SEP,list(S)) # put it on the list of separators
 	}
 	#names(CLI)=c(paste0("C",1:length(CLI))) # labelling cliques
 	#for (i in 1:length(SEP)) names(SEP[[i]])=paste0("S",i+1) # labelling separators
@@ -96,14 +177,14 @@ poc1=function(n) {
 	return(list(CLI=CLI,SEP=SEP))
 }
 
-#' CHECK1
+#' is.POC
 #'
 #' function CHECK checks if CLIB is a perfect ordering of cliques
 #' @param A Description of the parameter
 #' @keywords A
 #' @export 
 #' @examples
-#' CHECK1(CLIQUES)
+#' is.POC(CLIQUES)
 is.POC=function(CLIQUES)
 {
 		K=length(CLIQUES)
@@ -323,15 +404,17 @@ single.RCM <- function(W, o.k,prob)
 				o.k=c(1)
 		}
 		B.ColSum=colSums(B) # sums of columns in B
-    B0.labels=B.labels[B.ColSum>0]
-    B0.len=length(B0.labels)
-    if (B0.len==1) j=B.labels[B.ColSum>0];
-    if (B0.len> 1) j=sample(B0.labels,1)
-    prob = c(prob, 1/B0.len)
-    o.k.j=c(o.k,which(colnames(W)==j)) # vector of labels of already chosen cliques inlcuding possibly collapsed clique
+    B0.len=length(B.labels[B.ColSum>0])
 
-    if (length(o.k.j)<2 & K >1) single.RCM(W, o.k=o.k.j, prob=prob); # RCM step if o.k.j has single clique
-    if (length(o.k.j)>1 & K>1) single.RCM(W, o.k=o.k.j, prob=prob); # RCM step. ensuring we will not double the outcomes with investigating only one order of initial two elements of a POC
+    if (B0.len>= 1)
+    {
+        j=sample(B.labels[B.ColSum>0],1)
+        prob = c(prob, 1/B0.len)
+        o.k.j=c(o.k,which(colnames(W)==j)) # vector of labels of already chosen cliques inlcuding possibly collapsed clique
+
+        if (length(o.k.j)<2 & K >1) single.RCM(W, o.k=o.k.j, prob=prob); # RCM step if o.k.j has single clique
+        if (length(o.k.j)>1 & K>1) single.RCM(W, o.k=o.k.j, prob=prob); # RCM step. ensuring we will not double the outcomes with investigating only one order of initial two elements of a POC
+    }
 		}
 
 #' single.RCM.WRAPPER
@@ -349,7 +432,7 @@ single.RCM.WRAPPER <- function(CLIQUES)
 		assign("PROB", 1, envir = .GlobalEnv)
     K=length(CLIQUES)
 		if (K==1) return(c(c(1),1));
-		if (K==2) return(list(c(c(1,2),c(2,1))[rbinom(1,1,prob=0.5)+1],0.5));
+		if (K==2) return(list(list(c(1,2),c(2,1))[rbinom(1,1,prob=0.5)+1],0.5));
     W=Wmat(CLIQUES)
     colnames(W)=1:dim(W)[1]
 		single.RCM(W=W, o.k=c(), prob=c())
@@ -517,7 +600,23 @@ get.MH.poc<-function(CLIQUES, mh_burn=10)
 #' @export 
 #' @examples
 #' is.decomposable(CLIQUES)
-is.decomposable <- function(CLIQUES)
+is.decomposable <- function(CLIQUES, method='RCM')
 {
-    return()
+  K=length(CLIQUES)
+  found_POC=FALSE
+  if (method=='RCM')
+  {
+    while (!found_POC)
+  {
+    found_POC=is.POC(CLIQUES[rPOC_RCM(1, CLIQUES)])
+  }
+  }
+  if (method=="rejection")
+  {
+    while(!found_POC)
+  {
+    found_POC=is.POC(CLIQUES[sample(1:K)])
+  }
+  }
+  return(found_POC)
 }

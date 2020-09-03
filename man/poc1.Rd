@@ -4,7 +4,7 @@
 \alias{poc1}
 \title{poc1}
 \usage{
-poc1(n)
+poc1(n, p_min = 0.25, p_max = 0.75, structure = "any")
 }
 \arguments{
 \item{A}{Description of the parameter}

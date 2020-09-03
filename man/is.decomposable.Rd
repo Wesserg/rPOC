@@ -4,7 +4,7 @@
 \alias{is.decomposable}
 \title{is.decomposable}
 \usage{
-is.decomposable(CLIQUES)
+is.decomposable(CLIQUES, method = "RCM")
 }
 \arguments{
 \item{n}{Description of the parameter}

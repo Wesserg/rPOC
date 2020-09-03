@@ -4,7 +4,7 @@
 \alias{lp3}
 \title{lp3}
 \usage{
-lp3(A)
+lp3(A, p_min = 0.25, p_max = 0.75)
 }
 \arguments{
 \item{A}{Description of the parameter}
