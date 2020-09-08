@@ -1,0 +1,67 @@
+* rPOC: Tools for generating sampling and analyzing Perfect Orderings of Cliques (POC) in decomposable graphs
+The R package is in development stage. Please submit your improvement suggestions via github "Issues".
+** Prerequisits
+ #+BEGIN_SRC R
+library(igraph) #for graph manipulation and drawing
+library(network) #for graph manipulation and drawing (supplementary)
+library(parallel) #for multicore processing (does not work on windows)
+library(RColorBrewer) #for nicer clrs
+library(plyr) #for quick data objects manipulations
+library(devtools) #for managing packages under development (like ours)
+library(roxygen2) #for managing package documentation
+library(combinat) #for easy permutation generation
+ #+END_SRC
+
+** Installation
+As the package is still in development it can't be installed yet from public R repositories. Instead it has to be cloned from github and installed using R development tools.
+To clone/download the repository use the "Code-> Clone/Download" button on github project page or alternatively from console type:
+ #+BEGIN_SRC bash
+> git clone https://github.com/Wesserg/rPOC.git
+ #+END_SRC
+Then in R run:
+ #+BEGIN_SRC R
+install('Path/to/cloned/rPOC')
+ #+END_SRC
+
+** Examples
+
+*** Core functionality
+**** Generating Decomposable Graphs
+  #+BEGIN_SRC R
+     CLIQUES=poc1(n=16, strucutre='any') # Generate a decomposable graph with n vertices
+## other structures can be "tree" or "chain"
+   #+END_SRC
+
+**** Generating all POCs
+  #+BEGIN_SRC R
+
+    CLIQUES=list(c(1,2,3,4), c(4,5,6), c(2,3,4,5), c(1,4,6))
+    POCs=get.all.POCs(CLIQUES, method='RCM') #alternatively method = 'rejection'
+    print(POCs)
+   #+END_SRC
+
+**** Sampling POCs
+  #+BEGIN_SRC R
+    CLIQUES=poc1(n=16, strucutre='any') # Generate a decomposable graph with n vertices
+#Uniform sampling:
+    rPOC_unif(nsamples=10,CLIQUES=CLIQUES, method='RCM') #methods: RCM, rejection or M-H
+#Non-uniform RCM sampling (faster than uniform RCM)
+    rPOC_RCM(nsamples=10,CLIQUES=CLIQUES) #methods: RCM, rejection or M-H
+
+   #+END_SRC
+
+*** Drawing
+ #+BEGIN_SRC R
+   clrs=brewer.pal(8,'Set3')
+   CLIQUES=list(c(1,2,3,4), c(4,5,6), c(2,3,4,5), c(1,4,6))
+   prefix='my_example'
+   clique.graph=Get.graph(CLIQUES, draw=TRUE, prefix=prefix) #Create a graph from Cliques
+   weighted.clique.graph=Get.weighted.clique.graph(CLIQUES, draw=TRUE, prefix=prefix) #Create the WCG
+   reduced.weighted.clique.graph=Get.reduced.weighted.clique.graph(CLIQUES, draw=TRUE, prefix=prefix) #Create RWCG
+   Get.ALLPOCs.graph(POCs, prefix=prefix) # Draw all POCs
+  #+END_SRC
+*** Verifying decomposability
+ #+BEGIN_SRC R
+   CLIQUES=poc1(n=16, strucutre='any') # Generate a decomposable graph with n vertices
+   is.decomposable(CLIQUES, method='RCM') #(Available methods: RCM or rejection)
+  #+END_SRC

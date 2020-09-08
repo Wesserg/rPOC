@@ -447,23 +447,23 @@ single.RCM.WRAPPER <- function(CLIQUES)
 #' @export 
 #' @examples
 #' rPOC.unif(1,CLIQUES)
-rPOC_RCM <- function(n,CLIQUES,method='RCM', replace=TRUE)
+rPOC_RCM <- function(nsamples,CLIQUES,method='RCM', replace=TRUE)
 {
 		nPOCs=list()
 		if (method=='RCM')
 		{
 				if (replace)
 				{
-						nPOCs=replicate(n,single.RCM.WRAPPER(CLIQUES)[[1]])
+						nPOCs=replicate(nsamples,single.RCM.WRAPPER(CLIQUES)[[1]])
 				}
 				if (!(replace))
 				{
-						if (n>factorial(length(CLIQUES)))
+						if (nsamples>factorial(length(CLIQUES)))
 						{
 								return(nPOCs)
 						}
 						counter=1
-						while (counter<=n)
+						while (counter<=nsamples)
 						{
 								POC.candidate=single.RCM.WRAPPER(CLIQUES)[[1]]
 								if (!(list(POC.candidate) %in% nPOCs))
