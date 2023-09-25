@@ -58,12 +58,11 @@ lp2=function(A, p = 0.5)
 
 #' Function lp3
 #' 
-#' Draws (by rejection) randomly any non-empty proper subset of the set 1:n with the same probability.
+#' Splits a set into 3 non-empty subsets..
 #' @param A A vector of elements to choose from
-#' @param p The probability of including each element in the subset
 #' @keywords random subset
 #' @export 
-#' @return A randomly chosen non-empty proper subset of A
+#' @return A list of non-empty subsets of a set contaning all elements
 #' @examples
 #' lp3(1:10)
 lp3=function(A)
