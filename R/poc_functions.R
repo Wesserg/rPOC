@@ -1,109 +1,196 @@
-#' lp1
-#'
-#' Function lp1 draws (by rejection) randomly any non-empty subset of the set 1:n with the same probability. 
-#' @param A Description of the parameters
-#' @keywords A
+#' Function lp0
+#' 
+#' Draws (by rejection) randomly any proper subset of the set 1:n with the same probability.
+#' @param A A vector of elements to choose from
+#' @param p The probability of including each element in the subset
+#' @keywords random subset
 #' @export 
+#' @return A randomly chosen proper subset of A
 #' @examples
-#' lp1()
-lp1=function(A) {
-	n=length(A)
-	w=c()
-	while (sum(w)==0) { # forbidding emptyset
-		v=c()
-		for (i in 1:n) {v=c(v,sample(0:1,1))} # generation of the 0-1 sequence of length n 
-		w <- v
-	}
-	return(A[w==1]) # choose from A only elements at positions in which 1 was generated
-}
-
-#' lp2
-#'
-#' Function lp2 draws (by rejection) randomly any non-empty proper subset of the set 1:n with the same probability.
-#' @param A Description of the parameter
-#' @keywords A
-#' @export 
-#' @examples
-#' lp2(A)
-lp2=function(A) {
-	n=length(A)
-	w=c()
-	while (sum(w)==0 | sum(w)==n) { # forbidding emptyset and the improper subset
-		v=c()
-		for (i in 1:n) {v=c(v,sample(0:1,1))} # generation of the 0-1 sequence of length n 
-		w <- v
-	}
-	return(A[w==1]) # choose from A only elements at positions in which 1 was generated
+#' lp1(1:10)
+lp0=function(A, p=0.5)
+{
+    n=length(A)
+    w=rep(1,n)
+    while (sum(w)==n) w=rbinom(n,1,p)
+    return(A[w==1]) # choose from A only elements at positions in which 1 was generated
 }
 
 
-#' lp3
-#'
-#' Function lp3 draws (by rejection) randomly any subset of size >1 of the set 1:n with the same probability.
-#' @param A Description of the parameter
-#' @keywords A
+#' Function lp1
+#' 
+#' Draws (by rejection) randomly any non-empty subset of the set 1:n with the same probability.
+#' @param A A vector of elements to choose from
+#' @param p The probability of including each element in the subset
+#' @keywords random subset
 #' @export 
+#' @return A randomly chosen non-empty subset of A
 #' @examples
-#' lp3(A)
-lp3=function(A) {
-	n=length(A)
-	w=c()
-	while (sum(w)==0 | sum(w)==1) {	 # forbidding emptyset and singletons
-		v=c()
-		for (i in 1:n) {v=c(v,sample(0:1,1))} # generation of the 0-1 sequence of length n 
-		w <- v
-	}
-	return(A[w==1]) # choose from A only elements at positions in which 1 was generated
+#' lp1(1:10)
+lp1=function(A, p=0.5)
+{
+    n=length(A)
+    if (n==1) return(A);
+    w=c()
+    while (sum(w)==0) w=rbinom(n,1,p);
+    return(A[w==1]) # choose from A only elements at positions in which 1 was generated
+}
+
+#' Function lp2
+#' 
+#' Draws (by rejection) randomly any non-empty proper subset of the set 1:n with the same probability.
+#' @param A A vector of elements to choose from
+#' @param p The probability of including each element in the subset
+#' @keywords random subset
+#' @export 
+#' @return A randomly chosen non-empty proper subset of A
+#' @examples
+#' lp2(1:10)
+lp2=function(A, p = 0.5)
+{
+    n=length(A)
+    if (n==1) return(A);
+    w=c()
+    while (sum(w)==0 | sum(w)==n) w=rbinom(n,1,p);
+    return(A[w==1]) # choose from A only elements at positions in which 1 was generated
 }
 
 
-#' poc1
-#'
-#' FUNCTION poc1 DRAWS (RANDOMLY, Non-uniformly) A PERFECT ORDERING OF CLIQUES OF n NODES	 (AND THUS A DECOMPOSABLE GRAPH) ITS OUTPUT CLI IS THE INPUT TO THE MAIN PROCEDURE
-#' @param A Description of the parameter
-#' @keywords A
+#' Function lp3
+#' 
+#' Draws (by rejection) randomly any non-empty proper subset of the set 1:n with the same probability.
+#' @param A A vector of elements to choose from
+#' @param p The probability of including each element in the subset
+#' @keywords random subset
 #' @export 
+#' @return A randomly chosen non-empty proper subset of A
 #' @examples
-#' poc1(10)
-poc1=function(n) {
-	B=1:n
-	I<-n
-	C=lp3(B) # draw the first clique
-	CLI=list(C) # put it on the list of cliques
-	B<-setdiff(B,C) # what remains
-	I<-length(B) # size what remains
-	if (I==0) {
-		SEP=list() # in case the first clique is the whole set the set of separators is empty
-	} else {
-		S=lp2(C) # otherwise draw the separator S2 from the first clique
-		SEP=list(S) # and put it on the list of separators
-	}	 
-	while (I>0) { #	 proceed further only if what remains is non-empty
-		R=lp1(B) # draw subsequent residual from what remained
-		C=sort(union(S,R)) # create the subsequent clique 
-		CLI=c(CLI,list(C)) # put in on the list of cliques
-		B=setdiff(B,C) # what remains
-		I=length(B) # size of what remains
-		if (I==0) break # stop if empty set remains
-		k=length(CLI) # number of cliques already on the list 
-		L=sample(1:k,1) # pick up at random one of the cliques which are on the list at present
-		S=lp2(CLI[[L]]) # draw the subsequent separator from the chosen clique
-		SEP=c(SEP,list(S)) # put it on the list of separators
-	}
-	#names(CLI)=c(paste0("C",1:length(CLI))) # labelling cliques
-	#for (i in 1:length(SEP)) names(SEP[[i]])=paste0("S",i+1) # labelling separators
-	
-	return(list(CLI=CLI,SEP=SEP))
+#' lp3(1:10)
+lp3=function(A)
+{
+    n=length(A)
+	assign_first_elements = sample(1:n,3, replace = FALSE)
+	w = sample(c(1,2,3), n, replace=TRUE)
+	w[assign_first_elements] = c(1,2,3)
+    return(split(A, w)) # choose from A only elements at positions in which 1 was generated
 }
 
-#' CHECK1
-#'
-#' function CHECK checks if CLIB is a perfect ordering of cliques
-#' @param A Description of the parameter
-#' @keywords A
+
+#' Function lp3
+#' 
+#' Draws (by rejection) randomly any subset of size >1 of the set 1:n with the same probability.
+#' @param A A vector of elements to choose from
+#' @param p The probability of including each element in the subset
+#' @keywords random subset
+#' @export 
+#' @return A randomly chosen subset of size >1 of A
+#' @examples
+#' lp3(1:10)
+lp3=function(A, p=0.5)
+{
+    n=length(A)
+    w=c()
+    while (sum(w)==1 | sum(w)==0) w=rbinom(n,1,p);
+    return(A[w==1]) # choose from A only elements at positions in which 1 was generated
+}
+
+
+#' Function poc1
+#' 
+#' Draws (randomly, non-uniformly) a perfect ordering of cliques of n nodes (and thus a decomposable graph). Its output CLI is the input to the main procedure.
+#' @param n The number of nodes in the graph
+#' @param p The probability of including each element in the subsets
+#' @param structure The desired graph structure: 'any', 'tree', or 'chain'
+#' @keywords random graph, perfect ordering
+#' @export 
+#' @return A list containing the perfect ordering of cliques and the separators
+#' @examples
+#' poc1(10, structure = 'tree')
+poc1=function(n, p=0.5, structure='any')
+{
+    B=1:n
+
+    C=lp3(B, p) # draw the first clique
+    CLI=list(C)
+
+    B=setdiff(B,C) # what remains
+    I=length(B)
+
+    if (I==0)
+    {
+        SEP=list()
+    } # in case the first clique is the whole set the set of separators is empty
+    else
+    {
+        S=lp2(C,p) # otherwise draw the separator S2 from the first clique
+        SEP=list(S) # and put it on the list of separators
+    }	 
+    while (I>0)
+    { #	 proceed further only if what remains is non-empty
+        R=lp1(B,p) # draw subsequent residual from what remained
+        C=sort(union(S,R)) # create the subsequent clique 
+        CLI=c(CLI,list(C)) # put in on the list of cliques
+
+        B=setdiff(B,C) # what remains
+        I=length(B) # size of what remains
+        if (I==0) break  # stop if empty set remains
+        ## pick up at random one of the cliques which are on the list at present
+        if (structure=='any')
+        {
+            if (length(CLI)==1)
+            {
+                L=CLI[[1]]
+            }
+            else
+            {
+                L=sample(CLI,1)[[1]]
+            }
+        }
+        if (structure=='tree')
+        {
+         
+            L_for_SEP=lapply(1:length(CLI), function(i) setdiff(CLI[[i]], unlist(SEP)))
+            L=c()
+            if (length(L_for_SEP)==1)
+            {
+
+                L=L_for_SEP
+            }
+            else
+            {
+                while (length(L)==0) L=sample(L_for_SEP,1)[[1]];
+            }
+
+        }
+
+        if (structure=='chain')
+        {
+            L_for_SEP=lapply(1:length(CLI), function(i) setdiff(CLI[[i]], unlist(SEP)))
+            L=c()
+            if (length(L_for_SEP)==1)
+            {
+                L=L_for_SEP
+            }
+            else (length(L_for_SEP)==1)
+            {
+                while (length(L)==0) L=sample(list(L_for_SEP[[1]], L_for_SEP[[length(L_for_SEP)]]),1)[[1]];
+            }
+
+        }
+        S=lp2(L,p); # draw the subsequent separator from the chosen clique
+        SEP=c(SEP,list(S)) # put it on the list of separators
+    }
+    return(list(CLI=CLI,SEP=SEP))
+}
+
+#' is.POC
+#' 
+#' Checks if CLIQUES is a perfect ordering of cliques
+#' @param CLIQUES List of cliques
+#' @keywords CLIQUES
 #' @export 
 #' @examples
-#' CHECK1(CLIQUES)
+#' is.POC(CLIQUES)
 is.POC=function(CLIQUES)
 {
 		K=length(CLIQUES)
@@ -124,12 +211,12 @@ is.POC=function(CLIQUES)
 
 #' Wmat
 #'
-#' FUNCTIONS Wmat AND matmod FORM THE TECHNICAL CORE OF THE ALGORITHM WHICH CONSTRUCTS A PERFECT PERMUTATION OF CLIQUES (ASSUMING THAT IT IS POSSIBLE). function Wmat constructs the weighted coincidence matrix for the set	of cliques CLI with weight w(i,j) = number of vertices in C_i cap C_j
-#' @param A Description of the parameter
-#' @keywords A
+#' Constructs the weighted coincidence matrix for the set of cliques CLI with weight w(i,j) = number of vertices in C_i cap C_j
+#' @param CLI A list of cliques
+#' @keywords CLI
 #' @export
 #' @examples
-#' Wmat(CLIQUES)
+#' Wmat(CLI)
 Wmat=function(CLI)
 {
 		K=length(CLI)
@@ -145,13 +232,14 @@ Wmat=function(CLI)
 		return(W)
 }
 #' matmod
-#'
-#' FUNCTIONS Wmat AND matmod FORM THE TECHNICAL CORE OF THE ALGORITHM WHICH CONSTRUCTS A PERFECT PERMUTATION OF CLIQUES (ASSUMING THAT IT IS POSSIBLE). function matmod puts zeros in the weighted	incidence matrix A	for those edges connecting vertices from R to vertices from R^c which are removable with respect to R
-#' @param A Description of the parameter
-#' @keywords W
+#' 
+#' Puts zeros in the weighted incidence matrix A for those edges connecting vertices from R to vertices from R^c which are removable with respect to R
+#' @param W The weighted coincidence matrix
+#' @param A The set of vertices in R
+#' @keywords W, A
 #' @export 
 #' @examples
-#' matmod(W,R,CLI)
+#' matmod(W, A)
 matmod=function(W,A)
 {
 		K=dim(W)[1]
@@ -182,19 +270,20 @@ matmod=function(W,A)
 
 #' RCM
 #'
-#' THE CORE OF THE RCM WHICH PRINTS ALL PERFECT ORDERING OF "CLIQUES" IS FUNCTION: "RCM" THE FUNCTION "RCM.WRAPPER"	 JUST SETS THE STAGE	
-#' @param W Description of the parameter
-#' @keywords W
+#' Prints all perfect ordering of cliques
+#' @param W The weighted coincidence matrix
+#' @param o.k A vector of the indices of the ordered cliques in the perfect ordering
+#' @keywords W, o.k
 #' @export 
 #' @examples
-#' RCM(...)
+#' RCM(W, o.k)
 RCM <- function(W, o.k)
 {
 		K=dim(W)[1]
 		if (K==2)
 		{
 				## Using the fact that permutation of initial two elements of POC yields also a POC
-				o.k.final=unlist(lapply(strsplit(paste(colnames(W), collapse=""),"")[[1]], as.numeric))
+				o.k.final=unlist(lapply(strsplit(paste(colnames(W), collapse="_"),"_")[[1]], as.numeric))
 				assign("all.POCs", c(all.POCs, o.k.final),envir = .GlobalEnv) 
 				assign("all.POCs", c(all.POCs, o.k.final[c(2,1,3:length(o.k.final))]),envir = .GlobalEnv)
 		}
@@ -227,16 +316,18 @@ RCM <- function(W, o.k)
 
 #' RCM.WRAPPER
 #'
-#' THE CORE OF THE RCM WHICH PRINTS ALL PERFECT ORDERING OF "CLIQUES" IS FUNCTION: "RCM" THE FUNCTION "RCM.WRAPPER"	 JUST SETS THE STAGE	
-#' @param A Description of the parameter
-#' @keywords A
+#' The core of the RCM which prints all perfect orderings of "cliques" is function: "RCM". The function "RCM.WRAPPER" sets the stage.
+#' 
+#' @param CLIQUES a list of cliques 
+#' @return a matrix of all perfect orderings of cliques
+#' @keywords RCM, wrapper function
 #' @export 
 #' @examples
-#' RCM.WRAPPER(...)
+#' RCM.WRAPPER(list(1:3, 3:5, 2:4))
 RCM.WRAPPER <- function(CLIQUES)
 {
 		assign("all.POCs", c(), envir = .GlobalEnv)
-    assign("all.PROBSs", c(), envir = .GlobalEnv)
+    	assign("all.PROBSs", c(), envir = .GlobalEnv)
 
 		K=length(CLIQUES)
 		if (K==1) return(matrix(c(1),1,1));
@@ -251,12 +342,15 @@ RCM.WRAPPER <- function(CLIQUES)
 
 #' get.all.POCs
 #'
-#' get.all.POCs descroption
-#' @param A Description of the parameter
-#' @keywords A
+#' Gets all possible perfect orderings of cliques using RCM or rejection sampling method.
+#' 
+#' @param CLIQUES a list of cliques 
+#' @param method the sampling method to use (either "RCM" or "rejection")
+#' @return a matrix of all perfect orderings of cliques
+#' @keywords RCM, rejection sampling, cliques
 #' @export 
 #' @examples
-#' get.all.POCs(...)
+#' get.all.POCs(list(1:3, 3:5, 2:4), "RCM")
 get.all.POCs <- function(CLIQUES, method)
 {
 		K=length(CLIQUES)
@@ -287,21 +381,24 @@ get.all.POCs <- function(CLIQUES, method)
 
 #' single.RCM
 #'
-#' single.RCM descroption
-#' @param A Description of the parameter
-#' @keywords A
+#' The single RCM function uses recursive coalescence modeling to compute one perfect ordering of cliques.
+#' 
+#' @param W a matrix of weights
+#' @param o.k a vector of indices representing cliques already chosen
+#' @param prob the probability of the perfect ordering
+#' @return a list with two items: a vector representing a perfect ordering of cliques and a probability
+#' @keywords RCM, cliques, probability
 #' @export 
-#' @examples
-#' single.RCM(...)
 single.RCM <- function(W, o.k,prob)
 {
     K=dim(W)[1]
 		if (K==2)
 		{
-				## Using the fact that permutation of initial two elements of POC yields also a POC
-				poc=unlist(lapply(strsplit(paste(colnames(W), collapse=""),"")[[1]], as.numeric))
-				assign("POC",poc, envir=.GlobalEnv)
-				assign("PROB",c(prod(prob),prob), envir=.GlobalEnv)
+      ## Using the fact that permutation of initial two elements of POC yields also a POC
+      poc=unlist(lapply(strsplit(paste(colnames(W), collapse="_"),"_")[[1]], as.numeric))
+      ##assign("POC",poc, envir=.GlobalEnv)
+      ##assign("PROB",c(prod(prob),prob), envir=.GlobalEnv)
+      return(list(poc, c(prod(prob), prob)))
 		}
 
     		## Using the fact that permutation of initial two elements of POC yields also a POC
@@ -316,71 +413,82 @@ single.RCM <- function(W, o.k,prob)
 		if (length(o.k)>=2)
 		{
 				collapsed_weights=apply(W[o.k, -o.k, drop=F],2, max)
-				collapsed_names = c(paste(colnames(W)[o.k], collapse=""),colnames(W)[-o.k])
+				collapsed_names = c(paste(colnames(W)[o.k], collapse="_"),colnames(W)[-o.k])
 				W=rbind(c(0, collapsed_weights), cbind( collapsed_weights, W[-o.k, -o.k, drop=F]))
 				colnames(W) = collapsed_names
 				rownames(W) = collapsed_names
 				o.k=c(1)
 		}
-		B.ColSum=colSums(B) # sums of columns in B
-    B0.labels=B.labels[B.ColSum>0]
-    B0.len=length(B0.labels)
-    if (B0.len==1) j=B.labels[B.ColSum>0];
-    if (B0.len> 1) j=sample(B0.labels,1)
-    prob = c(prob, 1/B0.len)
-    o.k.j=c(o.k,which(colnames(W)==j)) # vector of labels of already chosen cliques inlcuding possibly collapsed clique
+	B.ColSum=colSums(B) # sums of columns in B
+    B0.len=length(B.labels[B.ColSum>0])
+	
+    if (B0.len>= 1)
+    {
+        j=sample(B.labels[B.ColSum>0],1)
+        prob = c(prob, 1/B0.len)
+        o.k.j=c(o.k,which(colnames(W)==j)) # vector of labels of already chosen cliques inlcuding possibly collapsed clique
 
-    if (length(o.k.j)<2 & K >1) single.RCM(W, o.k=o.k.j, prob=prob); # RCM step if o.k.j has single clique
-    if (length(o.k.j)>1 & K>1) single.RCM(W, o.k=o.k.j, prob=prob); # RCM step. ensuring we will not double the outcomes with investigating only one order of initial two elements of a POC
+        if (length(o.k.j)<2 & K >1) return(single.RCM(W, o.k=o.k.j, prob=prob)); # RCM step if o.k.j has single clique
+        if (length(o.k.j)>1 & K>1) return(single.RCM(W, o.k=o.k.j, prob=prob)); # RCM step. ensuring we will not double the outcomes with investigating only one order of initial two elements of a POC
+    }
 		}
 
 #' single.RCM.WRAPPER
 #'
-#' single.RCM.WRAPPER descroption
-#' @param A Description of the parameter
-#' @keywords A
-#' @export 
+#' The function single.RCM.WRAPPER returns a perfect ordering of cliques (POC) of the list of cliques.
+#' @param CLIQUES A list of cliques.
+#' @return Returns a list containing the perfect ordering of cliques (POC) and the probability of the POC.
 #' @examples
-#' single.RCM.WRAPPER(...)
+#' single.RCM.WRAPPER(CLIQUES)
 single.RCM.WRAPPER <- function(CLIQUES)
 {
+  ##assign("POC", c(), envir = .GlobalEnv)
+  ##assign("PROB", 1, envir = .GlobalEnv)
+  K=length(CLIQUES)
+  if (K==1)
+  {
+	 return(c(c(1),1))
+  } 
+  if (K==2) 
+  {
+	return(list(list(c(1,2),c(2,1))[rbinom(1,1,prob=0.5)+1],0.5))
+  }
+  if (K>2)
+  {
+	W=Wmat(CLIQUES)
+	colnames(W)=1:dim(W)[1]
+	poc.prob = single.RCM(W=W, o.k=c(), prob=c())
+	return(list(poc.prob[[1]], poc.prob[[2]]))
+  }
 
-    assign("POC", c(), envir = .GlobalEnv)
-		assign("PROB", 1, envir = .GlobalEnv)
-    K=length(CLIQUES)
-		if (K==1) return(c(c(1),1));
-		if (K==2) return(list(c(c(1,2),c(2,1))[rbinom(1,1,prob=0.5)+1],0.5));
-    W=Wmat(CLIQUES)
-    colnames(W)=1:dim(W)[1]
-		single.RCM(W=W, o.k=c(), prob=c())
-		return(list(POC, PROB))
 }
 
-#' rPOC
+#' rPOC_RCM
 #'
-#' rPOC description
-#' @param n Description of the parameter
-#' @keywords random sample
-#' @export 
+#' The function rPOC_RCM generates random samples of perfect orderings of cliques (POCs) from the list of cliques using the RCM method.
+#' @param nsamples Number of POCs to be generated.
+#' @param CLIQUES A list of cliques.
+#' @param replace Boolean indicating whether to sample with or without replacement.
+#' @return Returns a list of generated POCs.
 #' @examples
-#' rPOC.unif(1,CLIQUES)
-rPOC_RCM <- function(n,CLIQUES,method='RCM', replace=TRUE)
+#' rPOC_RCM(100, CLIQUES)
+rPOC_RCM <- function(nsamples,CLIQUES,method='RCM', replace=TRUE)
 {
 		nPOCs=list()
 		if (method=='RCM')
 		{
 				if (replace)
 				{
-						nPOCs=replicate(n,single.RCM.WRAPPER(CLIQUES)[[1]])
+						nPOCs=replicate(nsamples,single.RCM.WRAPPER(CLIQUES)[[1]])
 				}
 				if (!(replace))
 				{
-						if (n>factorial(length(CLIQUES)))
+						if (nsamples>factorial(length(CLIQUES)))
 						{
 								return(nPOCs)
 						}
 						counter=1
-						while (counter<=n)
+						while (counter<=nsamples)
 						{
 								POC.candidate=single.RCM.WRAPPER(CLIQUES)[[1]]
 								if (!(list(POC.candidate) %in% nPOCs))
@@ -398,12 +506,15 @@ rPOC_RCM <- function(n,CLIQUES,method='RCM', replace=TRUE)
 
 #' rPOC_unif
 #'
-#' rPOC description
-#' @param n Description of the parameter
-#' @keywords random sample
-#' @export 
+#' The function rPOC_unif generates random samples of perfect orderings of cliques (POCs) from the list of cliques using the rejection method.
+#' @param n Number of POCs to be generated.
+#' @param CLIQUES A list of cliques.
+#' @param method Method to be used for sampling. Either 'RCM' or 'rejection'.
+#' @param replace Boolean indicating whether to sample with or without replacement.
+#' @param mh_burn Integer indicating the number of Metropolis-Hastings burn-in iterations to be used if method='M-H'.
+#' @return Returns a list of generated POCs.
 #' @examples
-#' rPOC.unif(1,CLIQUES)
+#' rPOC_unif(100, CLIQUES)
 rPOC_unif<-function(n,CLIQUES,method='RCM', replace=TRUE, mh_burn=100)
 {
 		## it should return an array of POCs of size (n, len(Cliques))
@@ -486,10 +597,10 @@ rPOC_unif<-function(n,CLIQUES,method='RCM', replace=TRUE, mh_burn=100)
 
 #' get.MH.poc
 #'
-#' get.MH.poc description
-#' @param n Description of the parameter
-#' @keywords random sample
-#' @export 
+#' The function get.MH.poc generates a perfect ordering of cliques (POC) using the Metropolis-Hastings method.
+#' @param CLIQUES A list of cliques.
+#' @param mh_burn Integer indicating the number of Metropolis-Hastings burn-in iterations to be used.
+#' @return Returns the generated POC.
 #' @examples
 #' get.MH.poc(CLIQUES,1000)
 get.MH.poc<-function(CLIQUES, mh_burn=10)
@@ -511,13 +622,29 @@ get.MH.poc<-function(CLIQUES, mh_burn=10)
 
 #' is.decomposable
 #'
-#' is.decomposable description
-#' @param n Description of the parameter
-#' @keywords random sample
-#' @export 
+#' The function is.decomposable determines if a list of cliques is decomposable by checking if a perfect ordering of cliques (POC) can be generated using the provided method.
+#' @param CLIQUES A list of cliques.
+#' @param method Method to be used for generating POCs. Either 'RCM' or 'rejection'.
+#' @return Returns a boolean indicating if the list of cliques is decomposable.
 #' @examples
-#' is.decomposable(CLIQUES)
-is.decomposable <- function(CLIQUES)
+#' is.decomposable(CLIQUES, method='RCM')
+is.decomposable <- function(CLIQUES, method='RCM')
 {
-    return()
+  K=length(CLIQUES)
+  found_POC=FALSE
+  if (method=='RCM')
+  {
+    while (!found_POC)
+  {
+    found_POC=is.POC(CLIQUES[rPOC_RCM(1, CLIQUES)])
+  }
+  }
+  if (method=="rejection")
+  {
+    while(!found_POC)
+  {
+    found_POC=is.POC(CLIQUES[sample(1:K)])
+  }
+  }
+  return(found_POC)
 }

@@ -25,7 +25,6 @@ add.alpha <- function(col, alpha=1){
 Get.graph<-function(CLIQUES, draw=FALSE, prefix='')
 {
     edges=unique(matrix(unlist(lapply(CLIQUES, function(CLIQUE) combn(sort(CLIQUE),2))),ncol=2, byrow=T))
-    print(edges)
     nodes=sort(unique(unlist(CLIQUES)))
     G = graph.data.frame(edges, nodes, directed=FALSE)
     nCLIQUES=length(CLIQUES)
@@ -43,16 +42,14 @@ Get.graph<-function(CLIQUES, draw=FALSE, prefix='')
              mark.border=NA,
              vertex.color='white',
              vertex.size=20,
-             vertex.label.cex=2,
+             vertex.label.cex=4,
              vertex.frame.color='black',
              edge.color='black',
-             edge.width=2,
-             main=paste(CLIQUE.strings
-                 ,
-                   collapse=', '),
+             edge.width=3,
+             #main=paste(CLIQUE.strings, collapse=', '),
              main.cex=2
              )
-        legend('topleft', legend=CLIQUE.strings, cex=2)
+        legend('topleft', legend=CLIQUE.strings, cex=4)
         dev.off()
 
     }
@@ -76,15 +73,15 @@ Get.weighted.clique.graph<-function(CLIQUES, draw=FALSE, prefix='')
         png(paste('Figures/',prefix,'_WCG.png', sep="", collapse=""), height=1024, width=1024)
         plot(WCG,
              vertex.color=add.alpha(brewer.pal(length(CLIQUES),"Set3"),1),
-             vertex.size=prop_to_size(unlist(lapply(CLIQUES,length))*2,20,40,1),
+             vertex.size=prop_to_size(unlist(lapply(CLIQUES,length))*2,25,50,1),
              vertex.frame.color='black',
-             vertex.label.cex=2,
+             vertex.label.cex=4,
              vertex.label.color='black',
              vertex.label=paste('C',V(WCG), sep=""),
              edge.color=add.alpha('black',0.5),
-             edge.width=prop_to_size(E(WCG)$weight*2,20,40,1),
+             edge.width=prop_to_size(E(WCG)$weight*2,60,80,1),
              edge.label=E(WCG)$weight,
-             edge.label.cex=3,
+             edge.label.cex=5,
              edge.label.color='black')
         dev.off()
 
@@ -123,15 +120,15 @@ Get.reduced.weighted.clique.graph<-function(CLIQUES, draw=FALSE, prefix='')
         png(paste('Figures/',prefix,'_RWCG.png', sep="", collapse=""), height=1024, width=1024)
         plot(WCG,
              vertex.color=add.alpha(brewer.pal(length(CLIQUES),"Set3"),1),
-             vertex.size=prop_to_size(unlist(lapply(CLIQUES,length))*2,20,40,1),
+             vertex.size=prop_to_size(unlist(lapply(CLIQUES,length))*2,25,50,1),
              vertex.frame.color='black',
-             vertex.label.cex=2,
+             vertex.label.cex=4,
              vertex.label.color='black',
              vertex.label=paste('C',V(WCG), sep=""),
              edge.color=E(WCG)$color, #add.alpha('black',0.5),
-             edge.width=prop_to_size(E(WCG)$weight*2,20,40,1),
+             edge.width=prop_to_size(E(WCG)$weight*2,40,80,1),
              edge.label=E(WCG)$weight,
-             edge.label.cex=3,
+             edge.label.cex=5,
              edge.label.color='black')
         dev.off()
 
@@ -150,7 +147,7 @@ Get.reduced.weighted.clique.graph<-function(CLIQUES, draw=FALSE, prefix='')
 #' Get.ALLPOCs.graph(CLIQUES, draw=TRUE)
 Get.ALLPOCs.graph<-function(POClist, prefix='', background=FALSE)
 {
-    dim.scaling=max(512,256*sqrt(dim(POClist)[1]))
+    dim.scaling=512*dim(POClist)[2]
     L=t(apply(POClist,1,function(POC) sapply(length(POC):1, function(i) paste(c(POC[1:i]), collapse=""))))
 
     edge.list=lapply(1:dim(L)[1],function(i) t(matrix(c(L[i,-1],L[i,-dim(L)[2]]), ncol=2)))
@@ -166,9 +163,7 @@ Get.ALLPOCs.graph<-function(POClist, prefix='', background=FALSE)
     if (background)
     {
         all.permutations=matrix(unlist(permn(1:dim(POClist)[2])),ncol=dim(POClist)[2], byrow=T)
-        print(all.permutations)
         add_sequence=apply(all.permutations, 1, function(permutation)any(apply(POClist,1, function(POC) permutation==POC)))
-        print(add_sequence)
     }
 
     G = graph.data.frame(edges, nodes, directed=F)
@@ -182,6 +177,7 @@ Get.ALLPOCs.graph<-function(POClist, prefix='', background=FALSE)
          vertex.label.cex=sqrt(1/as.numeric(nodes[,'level']))*dim(POClist)[2],
 
          vertex.label.dist=0)
+    legend('topleft', legend=paste('#POCs = ',dim(POClist)[1],sep=''), cex=dim(POClist)[2]+3)
     dev.off() 
 }
 #' prop_to_size
