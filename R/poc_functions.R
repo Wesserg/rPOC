@@ -56,7 +56,7 @@ lp2=function(A, p = 0.5)
 }
 
 
-#' Function lp3
+#' Function split_into_3
 #' 
 #' Splits a set into 3 non-empty subsets..
 #' @param A A vector of elements to choose from
@@ -64,8 +64,8 @@ lp2=function(A, p = 0.5)
 #' @export 
 #' @return A list of non-empty subsets of a set contaning all elements
 #' @examples
-#' lp3(1:10)
-lp3=function(A)
+#' split_into_3(1:10)
+split_into_3=function(A)
 {
     n=length(A)
 	assign_first_elements = sample(1:n,3, replace = FALSE)
@@ -84,7 +84,7 @@ lp3=function(A)
 #' @export 
 #' @return A randomly chosen subset of size >1 of A
 #' @examples
-#' lp3(1:10)
+#' split_into_3(1:10)
 lp3=function(A, p=0.5)
 {
     n=length(A)

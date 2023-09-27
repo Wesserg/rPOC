@@ -24,7 +24,8 @@ add.alpha <- function(col, alpha=1){
 #' Get.graph(CLIQUES, draw=TRUE)
 Get.graph<-function(CLIQUES, draw=FALSE, prefix='')
 {
-    edges=unique(matrix(unlist(lapply(CLIQUES, function(CLIQUE) combn(sort(CLIQUE),2))),ncol=2, byrow=T))
+    CLIQUES_with_edges = CLIQUES[lengths(CLIQUES) > 1]
+    edges=unique(matrix(unlist(lapply(CLIQUES_with_edges, function(CLIQUE) combn(sort(CLIQUE),2))),ncol=2, byrow=T))
     nodes=sort(unique(unlist(CLIQUES)))
     G = graph.data.frame(edges, nodes, directed=FALSE)
     nCLIQUES=length(CLIQUES)
