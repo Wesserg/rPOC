@@ -165,7 +165,6 @@ POC_jump = function(CLI_init, p=0.5, poc_shuffle = TRUE)
     if (L==(K+1))
     {
       rmng_V_list = lp3(rmng_V)
-      # CLI_next = rmng_V_list[1] # do we need this one here?
       # Stirling numbers
       prob = prob*1/Stirling2(length(rmng_V),3)
       for (i in 1:length(rmng_V_list))

@@ -14,12 +14,12 @@ lp3(A, p = 0.5)
 \item{p}{The probability of including each element in the subset}
 }
 \value{
-A randomly chosen non-empty proper subset of A
+A list of non-empty subsets of a set contaning all elements
 
 A randomly chosen subset of size >1 of A
 }
 \description{
-Draws (by rejection) randomly any non-empty proper subset of the set 1:n with the same probability.
+Splits a set into 3 non-empty subsets..
 
 Draws (by rejection) randomly any subset of size >1 of the set 1:n with the same probability.
 }
