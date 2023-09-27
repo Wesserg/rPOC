@@ -9,7 +9,7 @@ POC_jump(CLI_init, p = 0.5, poc_shuffle = TRUE)
 \arguments{
 \item{CLI_init}{The initial graph, represented as a list of cliques.}
 
-\item{p}{The probability of adding each vertex to the new clique. Default is 0.5.}
+\item{p}{The probaability of adding each vertex to the new clique. Default is 0.5.}
 
 \item{poc_shuffle}{Whether to shuffle the vertices before adding the new clique. Default is TRUE.}
 }
@@ -20,7 +20,7 @@ A list of cliques representing the new graph.
 Generates a new graph by adding a new clique to an existing graph using the POC algorithm.
 }
 \details{
-This function takes an existing graph and generates a new graph by adding a new clique using the POC algorithm. The probability of adding each vertex to the new clique is specified by the p argument. The output is a list of cliques representing the new graph.
+This function takes an existing graph and generates a new graph by adding a new clique using the POC algorithm. The probaability of adding each vertex to the new clique is specified by the p argument. The output is a list of cliques representing the new graph.
 }
 \examples{
 POC_jump(list(c(1, 2), c(2, 3)), p = 0.8)

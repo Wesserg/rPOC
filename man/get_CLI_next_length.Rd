@@ -18,7 +18,7 @@ A numeric value indicating the length of the next clique to be added.
 Generates a random length for the next clique to be added to a graph.
 }
 \details{
-This function takes the remaining vertices and the size of the current clique and returns the length of the next clique to be added to the graph. The length of the next clique is chosen randomly, either K-1, K, or K+1, with equal probability.
+This function takes the remaining vertices and the size of the current clique and returns the length of the next clique to be added to the graph. The length of the next clique is chosen randomly, either K-1, K, or K+1, with equal probaability.
 }
 \examples{
 get_CLI_next_length(c(1, 2, 3), 4)

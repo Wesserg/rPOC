@@ -5,8 +5,6 @@
 \title{Function lp3}
 \usage{
 lp3(A, p = 0.5)
-
-lp3(A, p = 0.5)
 }
 \arguments{
 \item{A}{A vector of elements to choose from}
@@ -14,18 +12,13 @@ lp3(A, p = 0.5)
 \item{p}{The probability of including each element in the subset}
 }
 \value{
-A list of non-empty subsets of a set contaning all elements
-
 A randomly chosen subset of size >1 of A
 }
 \description{
-Splits a set into 3 non-empty subsets..
-
 Draws (by rejection) randomly any subset of size >1 of the set 1:n with the same probability.
 }
 \examples{
-lp3(1:10)
-lp3(1:10)
+split_into_3(1:10)
 }
 \keyword{random}
 \keyword{subset}
