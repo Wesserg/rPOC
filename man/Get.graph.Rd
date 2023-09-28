@@ -4,7 +4,7 @@
 \alias{Get.graph}
 \title{Get.graph}
 \usage{
-Get.graph(CLIQUES, draw = FALSE, prefix = "")
+Get.graph(CLIQUES, draw = FALSE, prefix = "", proba = "")
 }
 \arguments{
 \item{A}{Description of the parameter}

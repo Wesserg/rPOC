@@ -427,8 +427,8 @@ single.RCM <- function(W, o.k,prob)
         prob = c(prob, 1/B0.len)
         o.k.j=c(o.k,which(colnames(W)==j)) # vector of labels of already chosen cliques inlcuding possibly collapsed clique
 
-        if (length(o.k.j)<2 & K >1) return(single.RCM(W, o.k=o.k.j, prob=prob)); # RCM step if o.k.j has single clique
-        if (length(o.k.j)>1 & K>1) return(single.RCM(W, o.k=o.k.j, prob=prob)); # RCM step. ensuring we will not double the outcomes with investigating only one order of initial two elements of a POC
+        if (length(o.k.j)<2 & K > 1) return(single.RCM(W, o.k=o.k.j, prob=prob)); # RCM step if o.k.j has single clique
+        if (length(o.k.j)>1 & K > 1) return(single.RCM(W, o.k=o.k.j, prob=prob)); # RCM step. ensuring we will not double the outcomes with investigating only one order of initial two elements of a POC
     }
 		}
 

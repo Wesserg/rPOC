@@ -237,8 +237,8 @@ POC_jump = function(CLI_init, p=0.5, poc_shuffle = TRUE)
       CLI_next = c(CLI_next, list(union(unlist(sep), unlist(rmng_V))))
     }
   }
-
-  if (poc_shuffle)
+ # Depending on when in Markov Chain step we do the shuffle, we obtain potentially different MC
+  if (poc_shuffle) 
   {
     if (length(CLI_next)==1)
     {
@@ -246,7 +246,7 @@ POC_jump = function(CLI_init, p=0.5, poc_shuffle = TRUE)
     }
     else
     {
-      suffle_proba=1
+      shuffle_proba=1
       new_poc_proba = list()
       # Old shuffle option (single connected components)
       # new_poc_order = rPOC_RCM(1,CLI_next, replace=TRUE)
@@ -254,7 +254,7 @@ POC_jump = function(CLI_init, p=0.5, poc_shuffle = TRUE)
       
       # New shuffle option (multiple connected components):
       g = Get.weighted.clique.graph(CLI_next)
-      cl <- components(g)
+      cl <- components(g) # get connected components data
       if (cl$no == 1)
       {
         new_poc_order.proba = single.RCM.WRAPPER(CLI_next)
@@ -270,6 +270,7 @@ POC_jump = function(CLI_init, p=0.5, poc_shuffle = TRUE)
         {
           CLI_component = CLI_nexts[[i]]
           new_poc_order.proba = single.RCM.WRAPPER(CLI_component)
+
           new_poc_order  = new_poc_order.proba[[1]]
           new_poc_proba[[i]]  = new_poc_order.proba[[2]][1]
           CLI_nexts[[i]] = CLI_component[unlist(new_poc_order)]
@@ -277,9 +278,9 @@ POC_jump = function(CLI_init, p=0.5, poc_shuffle = TRUE)
         #CLI_nexts_new_order = lapply(CLI_nexts, function(CLI_component) CLI_component[unlist(rPOC_RCM(1,CLI_component, replace=TRUE))])
         CLI_next.proba = shuffle_lists(CLI_nexts)
         CLI_next = CLI_next.proba[[1]]
-        suffle_proba = CLI_next.proba[[2]]
+        shuffle_proba = CLI_next.proba[[2]]
       }
-      proba = suffle_proba*proba*prod(unlist(new_poc_proba))
+      proba = shuffle_proba*proba*prod(unlist(new_poc_proba))
     }
   }
   print(proba)

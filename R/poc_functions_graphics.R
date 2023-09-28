@@ -22,7 +22,7 @@ add.alpha <- function(col, alpha=1){
 #' @export 
 #' @examples
 #' Get.graph(CLIQUES, draw=TRUE)
-Get.graph<-function(CLIQUES, draw=FALSE, prefix='')
+Get.graph<-function(CLIQUES, draw=FALSE, prefix='', proba = '')
 {
     CLIQUES_with_edges = CLIQUES[lengths(CLIQUES) > 1]
     edges=unique(matrix(unlist(lapply(CLIQUES_with_edges, function(CLIQUE) combn(sort(CLIQUE),2))),ncol=2, byrow=T))
@@ -47,10 +47,12 @@ Get.graph<-function(CLIQUES, draw=FALSE, prefix='')
              vertex.frame.color='black',
              edge.color='black',
              edge.width=3,
-             #main=paste(CLIQUE.strings, collapse=', '),
-             main.cex=2
+             main=paste(c("Transition Probability: ", proba), sep=""),
+             main.cex=6,
+             
+
              )
-        legend('topleft', legend=CLIQUE.strings, cex=4)
+        legend('topleft', legend=CLIQUE.strings, cex=3)
         dev.off()
 
     }
