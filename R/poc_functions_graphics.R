@@ -36,6 +36,10 @@ Get.graph<-function(CLIQUES, draw=FALSE, prefix='', proba = '')
  
     if (draw)
     {
+        sub = paste(c("Transition Probability: ", proba), sep="", collapse = " ")
+        main = paste(CLIQUE.strings, sep="", collapse = " ")
+        print(main)
+        print(sub)
         png(paste('Figures/',prefix,'_G.png', sep="", collapse=""), height=1024, width=1024)
         plot(G,
              mark.groups=CLIQUES,
@@ -47,12 +51,11 @@ Get.graph<-function(CLIQUES, draw=FALSE, prefix='', proba = '')
              vertex.frame.color='black',
              edge.color='black',
              edge.width=3,
-             main=paste(c("Transition Probability: ", proba), sep=""),
-             main.cex=6,
-             
-
+             #main=main,
+             #sub=sub,
              )
-        legend('topleft', legend=CLIQUE.strings, cex=3)
+        title(sub,cex.main=3)
+        legend('topleft', legend=CLIQUE.strings, cex=3, fill=brewer.pal(nCLIQUES,"Set3"))
         dev.off()
 
     }

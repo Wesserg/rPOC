@@ -43,7 +43,7 @@
 
 # Return the merged and shuffled list
   return(list(shuffled_list, proba))
-# add proba - ration. K1!*...*Kn! n  -skoladowe / (sum(Ki))!
+# add proba - ration. K1!*...*Kn! n  -skladowe / (sum(Ki))!
 }
 
 
